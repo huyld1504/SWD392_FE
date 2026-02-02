@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowLeft } from 'lucide-react';
-
+import logo from '../assets/logo.png';
 export default function LoginPage() {
   const navigate = useNavigate();
 
@@ -15,19 +15,26 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-purple-50/30 flex flex-col">
       {/* Header */}
       <header className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="text-2xl font-semibold text-teal-600">
-            StudyShare
-          </Link>
-          <Link
-            to="/"
-            className="inline-flex items-center text-gray-600 hover:text-teal-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to home
+        <Link
+          to="/"
+          className="inline-flex items-center text-gray-600 hover:text-teal-600 transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          <span>Back to home</span>
+        </Link>
+        
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          <Link to="/" className="flex items-center space-x-2 text-2xl font-semibold text-teal-600">
+            <img
+              src={logo}
+              alt="StudyShare logo"
+              className="w-10 h-10 object-cover rounded-full"
+            />
+            <span>StudyShare</span>
           </Link>
         </div>
       </header>
+
 
       {/* Login Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">

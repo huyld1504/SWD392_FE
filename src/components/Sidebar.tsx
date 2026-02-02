@@ -84,7 +84,7 @@ export function Sidebar({ activeItem = 'posts-pending', onItemClick }: SidebarPr
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-4">
+            <nav className="flex-1 px-3 py-6 space-y-2">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeItem === item.id;
@@ -102,17 +102,17 @@ export function Sidebar({ activeItem = 'posts-pending', onItemClick }: SidebarPr
                                         handleItemClick(item.id);
                                     }
                                 }}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${isActive
+                                className={`w-full flex items-center justify-between px-2 py-4 rounded-lg transition-all duration-200 ${isActive
                                         ? 'bg-[#3B82F6] text-white shadow-lg'
                                         : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                                     }`}
                             >
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1">
                                     <Icon className="w-5 h-5 flex-shrink-0" />
                                     <span className="text-sm font-medium">{item.label}</span>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
                                     {/* Badge */}
                                     {item.badge && item.badge > 0 && (
                                         <span className="bg-[#F59E0B] text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
