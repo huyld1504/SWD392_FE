@@ -38,37 +38,7 @@ export default function SignupPage() {
 
             <form className="space-y-6">
               {/* Account Type Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  I am a
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setAccountType('student')}
-                    className={`py-3 px-4 rounded-lg border-2 transition-all ${
-                      accountType === 'student'
-                        ? 'border-teal-600 bg-teal-50 text-teal-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <GraduationCap className="w-5 h-5 mx-auto mb-1" />
-                    <span className="text-sm font-medium">Student</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAccountType('teacher')}
-                    className={`py-3 px-4 rounded-lg border-2 transition-all ${
-                      accountType === 'teacher'
-                        ? 'border-purple-600 bg-purple-50 text-purple-700'
-                        : 'border-gray-300 hover:border-gray-400'
-                    }`}
-                  >
-                    <User className="w-5 h-5 mx-auto mb-1" />
-                    <span className="text-sm font-medium">Teacher</span>
-                  </button>
-                </div>
-              </div>
+           
 
               {/* Full Name */}
               <div>
