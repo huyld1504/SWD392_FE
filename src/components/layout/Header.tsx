@@ -1,0 +1,149 @@
+import { Layout, Input, Badge, Avatar, Dropdown, Space, Typography } from 'antd';
+import type { MenuProps } from 'antd';
+import {
+  SearchOutlined,
+  BellOutlined,
+  HeartFilled,
+  LogoutOutlined,
+  UserOutlined,
+  GoldOutlined,
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
+
+const { Header: AntHeader } = Layout;
+const { Text } = Typography;
+
+export default function Header() {
+  const navigate = useNavigate();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const getRoleLabel = () => {
+    switch (user?.role) {
+      case 'ADMIN': return 'Admin';
+      case 'LECTURE': return 'Giảng viên';
+      default: return 'Sinh viên';
+    }
+  };
+
+  const userMenuItems: MenuProps['items'] = [
+    {
+      key: 'name',
+      label: (
+        <div style={{ padding: '4px 0' }}>
+          <div style={{ fontWeight: 600, fontSize: 14 }}>{user?.fullName}</div>
+          <div style={{ fontSize: 12, color: '#94a3b8' }}>{user?.email}</div>
+        </div>
+      ),
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Đăng xuất',
+      danger: true,
+      onClick: handleLogout,
+    },
+  ];
+
+  return (
+    <AntHeader
+      style={{
+        background: '#fff',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0 32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        height: 64,
+      }}
+    >
+      {/* Search */}
+    
+
+      {/* Right side */}
+      <Space size={20} align="center">
+        {/* BLUE balance — STUDENT only */}
+        {user?.role === 'STUDENT' && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: '#f0fdfb',
+              border: '1px solid #99f6e4',
+              borderRadius: 999,
+              padding: '5px 14px',
+            }}
+          >
+            <HeartFilled style={{ color: '#0d9488', fontSize: 12 }} />
+            <Text style={{ color: '#0d9488', fontWeight: 700, fontSize: 12 }}>
+              120 BLUE {/* TODO: replace with real wallet balance from GET /api/v1/wallets/me */}
+            </Text>
+          </div>
+        )}
+
+        {/* GOLD balance — LECTURE only */}
+        {user?.role === 'LECTURE' && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              background: '#fefce8',
+              border: '1px solid #fde68a',
+              borderRadius: 999,
+              padding: '5px 14px',
+            }}
+          >
+            <GoldOutlined style={{ color: '#d97706', fontSize: 12 }} />
+            <Text style={{ color: '#d97706', fontWeight: 700, fontSize: 12 }}>
+              0 GOLD {/* TODO: replace with real EARNED wallet balance */}
+            </Text>
+          </div>
+        )}
+
+        {/* Notifications */}
+        <Badge count={3} size="small" offset={[-2, 2]}>
+          <BellOutlined style={{ fontSize: 20, color: '#64748b', cursor: 'pointer' }} />
+        </Badge>
+
+        {/* User avatar + dropdown */}
+        <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
+          <Space
+            size={10}
+            style={{
+              cursor: 'pointer',
+              borderLeft: '1px solid #e2e8f0',
+              paddingLeft: 16,
+            }}
+          >
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, lineHeight: '16px' }}>
+                {user?.fullName}
+              </div>
+              <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: '14px' }}>
+                {getRoleLabel()}
+              </div>
+            </div>
+            <Avatar
+              src={user?.avatarUrl}
+              icon={!user?.avatarUrl && <UserOutlined />}
+              style={{ background: '#ccfbf1', color: '#0d9488' }}
+              size={36}
+            />
+          </Space>
+        </Dropdown>
+      </Space>
+    </AntHeader>
+  );
+}

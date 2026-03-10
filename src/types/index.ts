@@ -1,0 +1,204 @@
+// ==================== USER ====================
+export type UserRole = 'STUDENT' | 'LECTURE' | 'ADMIN';
+export type UserStatus = 'ACTIVE' | 'SUSPENDED' | 'BANNED';
+
+export interface User {
+  userId: number;
+  fullName: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  avatarUrl?: string;
+  createdAt: string;
+}
+
+// ==================== SUBJECT ====================
+export interface Subject {
+  subjectId: number;
+  subjectCode: string;
+  name: string;
+  description?: string;
+  deleted?: boolean;
+}
+
+// ==================== TOPIC ====================
+export interface Topic {
+   topicId: number;
+  name: string;
+  description?: string;
+  subjectId: number;
+  subjectName: string;
+}
+
+// ==================== ARTICLE ====================
+export type ArticleStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface Article {
+  articleId: number;
+  title: string;
+  contentBody: string;
+  status: ArticleStatus;
+  author: {
+    userId: number;
+    name: string;
+    email: string;
+    role: UserRole;
+    avatarUrl?: string;
+  };
+  approvedBy?: {
+    userId: number;
+    name: string;
+  };
+  topicId: number;
+  topicName: string;
+  createdAt: string;
+  updatedAt?: string;
+  approvedAt?: string;
+  diagrams: Diagram[];
+  comments?: Comment[];
+  bookmarked?: boolean;
+}
+
+// ==================== DIAGRAM ====================
+export interface Diagram {
+  diagramId: number;
+  imageUrl: string;
+  caption?: string;
+}
+
+// ==================== COMMENT ====================
+export interface Comment {
+  commentId: number;
+  content: string;
+  author: User;
+  createdAt: string;
+}
+
+// ==================== WALLET ====================
+export type WalletType = 'MAIN' | 'EARNED';
+export type WalletStatus = 'ACTIVE' | 'LOCKED';
+
+export interface Wallet {
+  walletId: number;
+  walletType: WalletType;
+  balance: number;
+  currency: string;
+  status: WalletStatus;
+  userId: number;
+  createdAt: string;
+}
+
+// ==================== TRANSACTION ====================
+export type TransactionType = 'CREDIT' | 'DEBIT';
+
+export interface Transaction {
+  transactionId: number;
+  amount: number;
+  type: TransactionType;
+  description?: string;
+  createdAt: string;
+}
+
+// ==================== FEEDING ====================
+export type FeedingStatus = 'PENDING' | 'EXECUTING' | 'COMPLETED' | 'FAILED';
+export type TriggerSource = 'MANUAL_ADMIN' | 'AUTO_SCHEDULE';
+
+export interface FeedingPeriod {
+  periodId: number;
+  scheduledAt?: string;
+  executedAt?: string;
+  status: FeedingStatus;
+  triggerSource: TriggerSource;
+  totalStudents?: number;
+  totalCoinsDistributed?: number;
+  createdAt: string;
+}
+
+// ==================== DONATION ====================
+export interface Donation {
+  donationId: number;
+  amount: number;
+  message?: string;
+  donor: User;
+  receiver: User;
+  article: Article;
+  createdAt: string;
+}
+
+// ==================== BOOKMARK ====================
+export interface Bookmark {
+  bookmarkId: number;
+  article: Article;
+  createdAt: string;
+}
+
+// ==================== API RESPONSE ====================
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  requestId: string;
+  timestamp: string;
+}
+
+export interface PaginationResponse<T> {
+  data: T[];
+  totalItems: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// ==================== API PARAMS ====================
+export interface PaginationParams {
+  page?: number;     // 1-based on frontend, converted to 0-based before API call
+  pageSize?: number; // maps to 'size' query param
+  keyword?: string;
+  sort?: string;
+  direction?: 'asc' | 'desc';
+}
+
+export interface ArticleParams extends PaginationParams {
+  status?: ArticleStatus;
+  topicId?: number;
+}
+
+export interface SubjectParams extends PaginationParams {
+  // no extra fields
+}
+
+export interface TopicParams extends PaginationParams {
+  subjectId?: number;
+}
+
+export interface DonationParams {
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface WalletAdminParams {
+  walletType?: WalletType;
+  status?: WalletStatus;
+  minBalance?: number;
+  maxBalance?: number;
+  page?: number;
+  size?: number;
+}
+
+export interface WalletTransactionParams {
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  size?: number;
+}
+
+export interface FeedingParams {
+  fromDate?: string;
+  toDate?: string;
+  status?: FeedingStatus;
+  triggerSource?: TriggerSource;
+  page?: number;
+  size?: number;
+}

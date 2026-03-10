@@ -15,20 +15,20 @@ export function Hero() {
               <FileText className="w-4 h-4 mr-2" />
               Built for students and teachers
             </div>
-            
+
             <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
               Share smarter study documents.{' '}
               <span className="text-teal-600">Get rewarded</span> for helping others.
             </h1>
-            
+
             <p className="text-xl text-gray-600 leading-relaxed">
-              A collaborative learning platform where students share study notes and solutions, 
+              A collaborative learning platform where students share study notes and solutions,
               teachers ensure quality through review, and contributors earn xu points for their help.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <button 
-                onClick={() => navigate('/signup')}
+              <button
+                onClick={() => navigate('/register')}
                 className="group inline-flex items-center justify-center px-8 py-4 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all shadow-lg hover:shadow-xl"
               >
                 Start sharing documents

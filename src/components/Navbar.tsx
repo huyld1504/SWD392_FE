@@ -51,7 +51,7 @@ export function Navbar() {
               Log in
             </button>
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/register')}
               className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
             >
               Get Started
@@ -114,7 +114,7 @@ export function Navbar() {
                 Log in
               </button>
               <button
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/register')}
                 className="w-full px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
               >
                 Get Started
