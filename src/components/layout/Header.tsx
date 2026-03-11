@@ -60,7 +60,7 @@ export default function Header() {
         padding: '0 32px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         position: 'sticky',
         top: 0,
         zIndex: 10,
@@ -113,9 +113,7 @@ export default function Header() {
         )}
 
         {/* Notifications */}
-        <Badge count={3} size="small" offset={[-2, 2]}>
-          <BellOutlined style={{ fontSize: 20, color: '#64748b', cursor: 'pointer' }} />
-        </Badge>
+  
 
         {/* User avatar + dropdown */}
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>

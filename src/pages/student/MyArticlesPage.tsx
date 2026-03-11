@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useMyArticles, useDeleteArticle } from '@/hooks/useArticles';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -16,9 +16,9 @@ import type { ColumnsType } from 'antd/es/table';
 const { Title, Text } = Typography;
 
 const STATUS_CONFIG: Record<ArticleStatus, { color: string; bg: string; dot: string; label: string }> = {
-  APPROVED: { color: '#047857', bg: '#d1fae5', dot: '#10b981', label: 'ÄÃ£ duyá»‡t' },
-  PENDING:  { color: '#b45309', bg: '#fef3c7', dot: '#f59e0b', label: 'Chá» duyá»‡t' },
-  REJECTED: { color: '#b91c1c', bg: '#fee2e2', dot: '#ef4444', label: 'Tá»« chá»‘i' },
+  APPROVED: { color: '#047857', bg: '#d1fae5', dot: '#10b981', label: 'Đã duyệt' },
+  PENDING:  { color: '#b45309', bg: '#fef3c7', dot: '#f59e0b', label: 'Chờ duyệt' },
+  REJECTED: { color: '#b91c1c', bg: '#fee2e2', dot: '#ef4444', label: 'Từ chối' },
 };
 
 function StatusBadge({ status }: { status: ArticleStatus }) {
@@ -38,7 +38,7 @@ function StatusBadge({ status }: { status: ArticleStatus }) {
 
 const PAGE_SIZE = 10;
 
-export default function MyArticlesPage() {
+export default function StudentMyArticlesPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<ArticleStatus | undefined>();
@@ -55,36 +55,45 @@ export default function MyArticlesPage() {
   const pendingCount = articles.filter((a) => a.status === 'PENDING').length;
 
   const tabs = [
-    { key: '', label: 'Táº¥t cáº£' },
-    { key: 'PENDING', label: <span>Chá» duyá»‡t {pendingCount > 0 && <Tag color="default" style={{ marginLeft: 4, fontSize: 11 }}>{pendingCount}</Tag>}</span> },
-    { key: 'APPROVED', label: 'ÄÃ£ duyá»‡t' },
-    { key: 'REJECTED', label: 'Tá»« chá»‘i' },
+    { key: '', label: 'Tất cả' },
+    {
+      key: 'PENDING',
+      label: (
+        <span>
+          Chờ duyệt{' '}
+          {pendingCount > 0 && (
+            <Tag color="default" style={{ marginLeft: 4, fontSize: 11 }}>{pendingCount}</Tag>
+          )}
+        </span>
+      ),
+    },
+    { key: 'APPROVED', label: 'Đã duyệt' },
+    { key: 'REJECTED', label: 'Từ chối' },
   ];
 
   const columns: ColumnsType<Article> = [
     {
-      title: 'TIÃŠU Äá»€',
+      title: 'TIÊU ĐỀ',
       dataIndex: 'title',
       render: (title: string, record: Article) => (
         <div>
           <Text
             strong
             style={{ color: '#1e293b', cursor: 'pointer', fontSize: 14 }}
-            onClick={() => navigate(`/lecture/articles/${record.articleId}`)}
-            className="hover:text-teal-600"
+            onClick={() => navigate(`/student/articles/${record.articleId}`)}
           >
             {title}
           </Text>
           {record.status === 'REJECTED' && (
             <div style={{ marginTop: 4, fontSize: 11, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span>â—</span> Ná»™i dung chÆ°a Ä‘áº¡t tiÃªu chuáº©n há»c thuáº­t
+              <span>●</span> Nội dung chưa đạt tiêu chuẩn học thuật
             </div>
           )}
         </div>
       ),
     },
     {
-      title: 'CHá»¦ Äá»€',
+      title: 'CHỦ ĐỀ',
       dataIndex: 'topicName',
       render: (v: string) => (
         <Tag style={{ background: '#f1f5f9', color: '#475569', border: '1px solid #e2e8f0', borderRadius: 6, fontWeight: 500 }}>
@@ -93,12 +102,12 @@ export default function MyArticlesPage() {
       ),
     },
     {
-      title: 'TRáº NG THÃI',
+      title: 'TRẠNG THÁI',
       dataIndex: 'status',
       render: (s: ArticleStatus) => <StatusBadge status={s} />,
     },
     {
-      title: 'NGÃ€Y Táº O',
+      title: 'NGÀY TẠO',
       dataIndex: 'createdAt',
       render: (d: string) => (
         <Text style={{ color: '#64748b', fontSize: 13 }}>
@@ -107,22 +116,22 @@ export default function MyArticlesPage() {
       ),
     },
     {
-      title: <span style={{ float: 'right' }}>THAO TÃC</span>,
+      title: <span style={{ float: 'right' }}>THAO TÁC</span>,
       key: 'actions',
       render: (_: unknown, record: Article) => (
         <Space size={4} style={{ justifyContent: 'flex-end', display: 'flex' }}>
           <Button
             type="text" size="small" icon={<EyeOutlined />}
             style={{ color: '#94a3b8' }}
-            onClick={() => navigate(`/lecture/articles/${record.articleId}`)}
+            onClick={() => navigate(`/student/articles/${record.articleId}`)}
             title="Xem"
           />
           {record.status !== 'APPROVED' && (
             <Button
               type="text" size="small" icon={<EditOutlined />}
               style={{ color: '#94a3b8' }}
-              onClick={() => navigate(`/lecture/articles/${record.articleId}/edit`)}
-              title="Sá»­a"
+              onClick={() => navigate(`/student/my-articles/${record.articleId}/edit`)}
+              title="Sửa"
             />
           )}
           {record.status === 'PENDING' && (
@@ -130,7 +139,7 @@ export default function MyArticlesPage() {
               type="text" size="small" icon={<DeleteOutlined />}
               style={{ color: '#94a3b8' }}
               onClick={() => setDeleteTarget(record)}
-              title="XÃ³a"
+              title="Xóa"
             />
           )}
         </Space>
@@ -139,12 +148,12 @@ export default function MyArticlesPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1300, margin: '0 auto' }}>
       {/* Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 32 }}>
         <div>
-          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>BÃ i viáº¿t cá»§a tÃ´i</Title>
-          <Text style={{ color: '#64748b' }}>Quáº£n lÃ½ vÃ  theo dÃµi hiá»‡u suáº¥t cÃ¡c bÃ i viáº¿t chuyÃªn mÃ´n cá»§a báº¡n.</Text>
+          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>Bài viết của tôi</Title>
+          <Text style={{ color: '#64748b' }}>Quản lý và theo dõi hiệu suất các bài viết của bạn.</Text>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Input
@@ -153,8 +162,7 @@ export default function MyArticlesPage() {
             onPressEnter={() => { setKeyword(searchInput); setPage(1); }}
             onClear={() => { setKeyword(''); setPage(1); }}
             allowClear
-            placeholder="TÃ¬m kiáº¿m tiÃªu Ä‘á» bÃ i viáº¿t..."
-            prefix={<span style={{ color: '#94a3b8', fontSize: 14 }}>âŠŸ</span>}
+            placeholder="Tìm kiếm tiêu đề bài viết..."
             style={{ width: 260, borderRadius: 8 }}
           />
           <Button
@@ -162,9 +170,9 @@ export default function MyArticlesPage() {
             icon={<PlusOutlined />}
             size="middle"
             style={{ background: '#0d9488', borderColor: '#0d9488', borderRadius: 8, fontWeight: 700, height: 38 }}
-            onClick={() => navigate('/lecture/articles/new')}
+            onClick={() => navigate('/student/my-articles/new')}
           >
-            Táº¡o bÃ i má»›i
+            Tạo bài mới
           </Button>
         </div>
       </div>
@@ -191,14 +199,14 @@ export default function MyArticlesPage() {
             emptyText: (
               <Empty
                 image={<FileTextOutlined style={{ fontSize: 48, color: '#cbd5e1' }} />}
-                description={<Text style={{ color: '#94a3b8' }}>KhÃ´ng cÃ³ bÃ i viáº¿t nÃ o</Text>}
+                description={<Text style={{ color: '#94a3b8' }}>Không có bài viết nào</Text>}
               >
                 <Button
                   type="primary"
                   style={{ background: '#0d9488', borderColor: '#0d9488' }}
-                  onClick={() => navigate('/lecture/articles/new')}
+                  onClick={() => navigate('/student/my-articles/new')}
                 >
-                  Táº¡o bÃ i viáº¿t Ä‘áº§u tiÃªn
+                  Tạo bài viết đầu tiên
                 </Button>
               </Empty>
             ),
@@ -212,44 +220,26 @@ export default function MyArticlesPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: '0 0 12px 12px',
         }}>
           <Text style={{ fontSize: 12, color: '#94a3b8' }}>
-            Hiá»ƒn thá»‹ <strong style={{ color: '#374151' }}>{articles.length}</strong> / <strong style={{ color: '#374151' }}>{total}</strong> bÃ i viáº¿t
+            Hiển thị <strong style={{ color: '#374151' }}>{articles.length}</strong> / <strong style={{ color: '#374151' }}>{total}</strong> bài viết
           </Text>
           <div style={{ display: 'flex', gap: 4 }}>
-            <Button size="small" disabled={page === 1} onClick={() => setPage((p) => p - 1)} style={{ borderRadius: 6 }}>â€¹</Button>
-            {Array.from({ length: data?.totalPages ?? 1 }, (_, i) => i + 1).slice(Math.max(0, page - 2), page + 1).map((p) => (
-              <Button
-                key={p} size="small"
-                type={p === page ? 'primary' : 'default'}
-                style={{ borderRadius: 6, ...(p === page ? { background: '#0d9488', borderColor: '#0d9488' } : {}) }}
-                onClick={() => setPage(p)}
-              >{p}</Button>
-            ))}
-            <Button size="small" disabled={page === (data?.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)} style={{ borderRadius: 6 }}>â€º</Button>
+            <Button size="small" disabled={page === 1} onClick={() => setPage((p) => p - 1)} style={{ borderRadius: 6 }}>‹</Button>
+            {Array.from({ length: data?.totalPages ?? 1 }, (_, i) => i + 1)
+              .slice(Math.max(0, page - 2), page + 1)
+              .map((p) => (
+                <Button
+                  key={p} size="small"
+                  type={p === page ? 'primary' : 'default'}
+                  style={{ borderRadius: 6, ...(p === page ? { background: '#0d9488', borderColor: '#0d9488' } : {}) }}
+                  onClick={() => setPage(p)}
+                >{p}</Button>
+              ))}
+            <Button size="small" disabled={page === (data?.totalPages ?? 1)} onClick={() => setPage((p) => p + 1)} style={{ borderRadius: 6 }}>›</Button>
           </div>
         </div>
       </Card>
 
-      {/* Stats */}
-      <Row gutter={16}>
-        {[
-          { label: 'Tá»•ng lÆ°á»£t xem', value: 'â€”', extra: null, icon: <EyeOutlined style={{ color: '#0d9488', fontSize: 20 }} /> },
-          { label: 'ThÃ nh tá»±u', value: 'Badge Báº¡c', extra: null, icon: <StarFilled style={{ color: '#f59e0b', fontSize: 20 }} /> },
-          { label: 'TÆ°Æ¡ng tÃ¡c', value: 'â€”', extra: null, icon: <MessageOutlined style={{ color: '#6366f1', fontSize: 20 }} /> },
-          { label: 'HÃ i lÃ²ng', value: 'â€”', extra: null, icon: <HeartOutlined style={{ color: '#f43f5e', fontSize: 20 }} /> },
-        ].map((stat) => (
-          <Col key={stat.label} xs={24} sm={12} lg={6}>
-            <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} bodyStyle={{ padding: '20px 24px' }}>
-              <Text style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>
-                {stat.label}
-              </Text>
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                <Text strong style={{ fontSize: 22, color: '#0f172a' }}>{stat.value}</Text>
-                {stat.icon}
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+    
 
       {/* Delete confirm modal */}
       <Modal
@@ -259,13 +249,13 @@ export default function MyArticlesPage() {
           if (!deleteTarget) return;
           deleteArticle(deleteTarget.articleId, { onSuccess: () => setDeleteTarget(null) });
         }}
-        okText="XÃ³a"
-        cancelText="Há»§y"
+        okText="Xóa"
+        cancelText="Hủy"
         okButtonProps={{ danger: true, loading: isDeleting }}
-        title="XÃ³a bÃ i viáº¿t"
+        title="Xóa bài viết"
         centered
       >
-        <Text>Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n xÃ³a bÃ i viáº¿t <strong>"{deleteTarget?.title}"</strong>? HÃ nh Ä‘á»™ng nÃ y khÃ´ng thá»ƒ hoÃ n tÃ¡c.</Text>
+        <Text>Bạn có chắc chắn muốn xóa bài viết <strong>"{deleteTarget?.title}"</strong>? Hành động này không thể hoàn tác.</Text>
       </Modal>
     </div>
   );

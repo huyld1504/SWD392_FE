@@ -30,7 +30,8 @@ const studentItems: MenuItem[] = [
   makeItem(<Link to="/student/dashboard">Dashboard</Link>, '/student/dashboard', <DashboardOutlined />),
   makeItem(<Link to="/student/articles">Bài viết</Link>, '/student/articles', <BookOutlined />),
   makeItem(<Link to="/student/bookmarks">Bài đã lưu</Link>, '/student/bookmarks', <SaveOutlined />),
-  makeItem(<Link to="/student/donations">Lịch sử donate</Link>, '/student/wallet ', <HistoryOutlined />),
+  makeItem(<Link to="/student/wallet">Lịch sử donate</Link>, '/student/wallet ', <HistoryOutlined />),
+  makeItem(<Link to="/student/my-articles">Bài viết của tôi</Link>, '/student/my-articles', <HeartOutlined />),
 ];
 
 const lectureItems: MenuItem[] = [

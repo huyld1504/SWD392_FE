@@ -51,6 +51,8 @@ export interface Article {
   };
   topicId: number;
   topicName: string;
+  subjectId?: number;
+  subjectName?: string;
   createdAt: string;
   updatedAt?: string;
   approvedAt?: string;

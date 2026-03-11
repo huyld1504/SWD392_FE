@@ -38,7 +38,7 @@ export default function WalletPage() {
 
       {/* Wallet Card */}
       <div className="mb-10">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-[#087a71] p-8 text-white shadow-xl shadow-teal-600/20">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#E0F8F7] via-[#B2EBF2] to-[#80DEEA] p-8 shadow-xl shadow-cyan-400/20 text-slate-900">
           {/* Decorative background element */}
           <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl"></div>
           <div className="absolute -left-16 -bottom-16 h-48 w-48 rounded-full bg-black/10 blur-2xl"></div>
@@ -66,14 +66,7 @@ export default function WalletPage() {
                 <span className="material-symbols-outlined text-sm">key</span>
                 ID Ví: WS-{mainWallet?.walletId?.toString().padStart(8, '0') || '00000000'}
               </div>
-              <div className="flex gap-2">
-                <button className="bg-white text-teal-700 px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-teal-50 transition-colors flex items-center gap-2 shadow-sm cursor-pointer border-none">
-                  <span className="material-symbols-outlined text-lg">add_circle</span> Nạp BLUE
-                </button>
-                <button className="bg-white/20 border border-white/30 backdrop-blur-md text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-white/30 transition-colors cursor-pointer">
-                  Rút tiền
-                </button>
-              </div>
+         
             </div>
           </div>
         </div>

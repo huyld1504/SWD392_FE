@@ -16,6 +16,9 @@ import ArticleListPage from '@/pages/student/ArticleListPage';
 import StudentArticleDetailPage from '@/pages/student/ArticleDetailPage';
 import BookmarkPage from '@/pages/student/BookmarkPage';
 import WalletPage from '@/pages/student/WalletPage';
+import StudentMyArticlesPage from '@/pages/student/MyArticlesPage';
+import StudentCreateArticlePage from '@/pages/student/CreateArticlePage';
+import StudentEditArticlePage from '@/pages/student/EditArticlePage';
 
 // Lecture pages
 import LectureDashboard from '@/pages/lecture/LectureDashboard';
@@ -84,6 +87,18 @@ const router = createBrowserRouter([
           {
             path: '/student/wallet',
             element: <WalletPage />,
+          },
+          {
+            path: '/student/my-articles',
+            element: <StudentMyArticlesPage />,
+          },
+          {
+            path: '/student/my-articles/new',
+            element: <StudentCreateArticlePage />,
+          },
+          {
+            path: '/student/my-articles/:id/edit',
+            element: <StudentEditArticlePage />,
           },
         ],
       },

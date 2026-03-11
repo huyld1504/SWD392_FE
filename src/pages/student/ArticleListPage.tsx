@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useArticles } from '@/hooks/useArticles';
-import { useTopics } from '@/hooks/useTopics';
+import { useTopics, useTopicsBySubject, useSubjects } from '@/hooks/useTopics';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Input, Select, Pagination, Skeleton, Empty, Avatar } from 'antd'; // ← Bỏ Option
@@ -89,10 +89,7 @@ function ArticleCard({ article }: { article: Article }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-gray-500 text-sm font-medium">
-            <HeartFilled className="text-red-500" />
-            <span>25</span>
-          </div>
+        
         </div>
       </div>
     </article>
@@ -106,11 +103,16 @@ export default function ArticleListPage() {
   const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [page, setPage] = useState(1);
+  const [subjectId, setSubjectId] = useState<number | undefined>();
   const [topicId, setTopicId] = useState<number | undefined>();
   const [direction, setDirection] = useState<'desc' | 'asc'>('desc');
 
-  const { data: topicsPage } = useTopics();
-  const topics = topicsPage?.data ?? [];
+  const { data: subjectsPage } = useSubjects();
+  const subjects = subjectsPage?.data ?? [];
+
+  const { data: topicsPage } = useTopicsBySubject(subjectId!);
+  const { data: allTopicsPage } = useTopics();
+  const topics = subjectId ? (topicsPage?.data ?? []) : (allTopicsPage?.data ?? []);
 
   const { data, isLoading } = useArticles({
     keyword,
@@ -154,6 +156,29 @@ export default function ArticleListPage() {
               }}
             />
           </div>
+
+<div style={{ flex: '0 1 280px' }}>
+            <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Môn học</p>
+            <Select
+              style={{ width: '100%' }}
+              size="large"
+              placeholder="Chọn môn học"
+              allowClear
+              value={subjectId}
+              onChange={(val) => {
+                setSubjectId(val);
+                setTopicId(undefined);
+                setPage(1);
+              }}
+            >
+              {subjects.map((s) => (
+                <Select.Option key={s.subjectId} value={s.subjectId}>
+                  {s.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
 
           {/* Topic */}
           <div style={{ flex: '0 1 280px' }}>

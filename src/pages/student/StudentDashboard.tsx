@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useArticles } from '@/hooks/useArticles';
-import { useTopics } from '@/hooks/useTopics';
+import { useTopics, useSubjects } from '@/hooks/useTopics';
 import { useAuthStore } from '@/stores/authStore';
 import type { Article } from '@/types';
 
@@ -132,8 +132,10 @@ export default function StudentDashboard() {
   sort: 'createdAt',
   direction: 'desc',
   });
- const { data: topicsPage } = useTopics();
-const topics = topicsPage?.data ?? [];
+  const { data: topicsPage } = useTopics();
+  const topics = topicsPage?.data ?? [];
+  const { data: subjectsPage } = useSubjects();
+  const subjects = subjectsPage?.data ?? [];
 
 
   const today = format(new Date(), "EEEE, dd 'Tháng' M, yyyy", { locale: vi });
@@ -143,11 +145,31 @@ const topics = topicsPage?.data ?? [];
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto' }}>
       {/* Welcome */}
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>
-          Xin chào, {user?.fullName}! 👋
-        </Title>
-        <Text style={{ color: '#64748b', fontWeight: 500 }}>{todayLabel}</Text>
+      <div style={{ marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <div>
+          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>
+            Xin chào, {user?.fullName}! 👋
+          </Title>
+          <Text style={{ color: '#64748b', fontWeight: 500 }}>{todayLabel}</Text>
+        </div>
+        <Link to="/student/my-articles/new">
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            style={{
+              background: 'linear-gradient(135deg, #0d9488 0%, #065f46 100%)',
+              border: 'none',
+              borderRadius: 10,
+              fontWeight: 700,
+              height: 44,
+              paddingInline: 24,
+              boxShadow: '0 4px 14px rgba(13,148,136,0.35)',
+            }}
+          >
+            Tạo bài viết
+          </Button>
+        </Link>
       </div>
 
       {/* Wallet card + Quick stats */}
@@ -262,17 +284,7 @@ const topics = topicsPage?.data ?? [];
                 </Space>
                 <Text strong style={{ fontSize: 18 }}>120</Text>
               </div>
-              <Divider style={{ margin: 0 }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Space size={12}>
-                  <div style={{ width: 40, height: 40, borderRadius: 8, background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <BookOutlined style={{ color: '#f97316', fontSize: 18 }} />
-                  </div>
-                  <Text style={{ fontWeight: 500 }}>Bài đã đọc</Text>
-                </Space>
-                <Text strong style={{ fontSize: 18 }}>42</Text>
-              </div>
-              <Divider style={{ margin: 0 }} />
+          
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Space size={12}>
                   <div style={{ width: 40, height: 40, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -287,10 +299,42 @@ const topics = topicsPage?.data ?? [];
         </Col>
       </Row>
 
-      {/* Popular Topics */}
+      {/* Subject Topics */}
       <div style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Title level={5} style={{ margin: 0, fontWeight: 700 }}>Chủ đề phổ biến</Title>
+          <Title level={5} style={{ margin: 0, fontWeight: 700 }}>Môn học</Title>
+          <Link to="/student/articles" style={{ color: '#0d9488', fontWeight: 600, fontSize: 14 }}>
+            Xem tất cả
+          </Link>
+        </div>
+        <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 8 }}>
+          {subjects?.slice(0, 8).map((subject, idx) => (
+            <Tag
+              key={subject.subjectId}
+              style={{
+                padding: '6px 18px',
+                borderRadius: 999,
+                cursor: 'pointer',
+                fontWeight: 500,
+                fontSize: 13,
+                whiteSpace: 'nowrap',
+                background: idx === 0 ? '#0d9488' : '#fff',
+                color: idx === 0 ? '#fff' : '#334155',
+                border: idx === 0 ? 'none' : '1px solid #e2e8f0',
+                transition: 'all 0.2s',
+              }}
+            >
+              {subject.name}
+            </Tag>
+          ))}
+        </div>
+      </div>
+
+      {/*  Topics */}
+    
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <Title level={5} style={{ margin: 0, fontWeight: 700 }}>Chủ đề phổ biến </Title>
           <Link to="/student/articles" style={{ color: '#0d9488', fontWeight: 600, fontSize: 14 }}>
             Xem tất cả
           </Link>
@@ -317,7 +361,6 @@ const topics = topicsPage?.data ?? [];
           ))}
         </div>
       </div>
-
       {/* Latest Articles */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
