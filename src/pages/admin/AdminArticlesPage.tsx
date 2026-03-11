@@ -4,19 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Eye, FileText, Search, Filter } from 'lucide-react';
 import ArticleStatusBadge from '@/components/common/ArticleStatusBadge';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-// import type { ArticleStatus } from '@/types';
+import type { ArticleStatus } from '@/types';
 
 export default function AdminArticlesPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  // const [statusFilter, setStatusFilter] = useState<ArticleStatus | ''>('PENDING');
+  const [statusFilter, setStatusFilter] = useState<ArticleStatus | ''>('PENDING');
   const [rejectModal, setRejectModal] = useState<{ id: number; title: string } | null>(
     null,
   );
   const [rejectReason, setRejectReason] = useState('');
 
   const { data, isLoading } = useArticles({
-    page: page - 1,
+    page: page ,
     pageSize: 10,
     // status: statusFilter || undefined,
   });
@@ -37,12 +37,12 @@ export default function AdminArticlesPage() {
     );
   };
 
-  // const filterOptions: { value: ArticleStatus | ''; label: string }[] = [
-  //   { value: 'PENDING', label: 'Chờ duyệt' },
-  //   { value: 'APPROVED', label: 'Đã duyệt' },
-  //   { value: 'REJECTED', label: 'Từ chối' },
-  //   { value: '', label: 'Tất cả' },
-  // ];
+  const filterOptions: { value: ArticleStatus | ''; label: string }[] = [
+    { value: 'PENDING', label: 'Chờ duyệt' },
+    { value: 'APPROVED', label: 'Đã duyệt' },
+    { value: 'REJECTED', label: 'Từ chối' },
+    { value: '', label: 'Tất cả' },
+  ];
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -66,7 +66,7 @@ export default function AdminArticlesPage() {
             <Filter size={18} className="text-gray-500" />
             <span className="text-sm font-medium text-gray-700">Lọc:</span>
           </div>
-          {/* {filterOptions.map((opt) => (
+          {filterOptions.map((opt) => (
             <button
               key={opt.value}
               onClick={() => {
@@ -80,7 +80,7 @@ export default function AdminArticlesPage() {
             >
               {opt.label}
             </button>
-          ))} */}
+          ))}
         </div>
       </div>
 

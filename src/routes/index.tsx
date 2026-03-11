@@ -30,6 +30,10 @@ import LectureArticleDetailPage from '@/pages/lecture/ArticleDetailPage';
 // Admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminArticlesPage from '@/pages/admin/AdminArticlesPage';
+import AdminSubjectsPage from '@/pages/admin/AdminSubjectsPage';
+import AdminTopicsPage from '@/pages/admin/AdminTopicsPage';
+import AdminFeedingsPage from '@/pages/admin/AdminFeedingsPage';
+import AdminWalletsPage from '@/pages/admin/AdminWalletsPage';
 
 // Guards
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -159,6 +163,22 @@ const router = createBrowserRouter([
           {
             path: '/admin/articles',
             element: <AdminArticlesPage />,
+          },
+          {
+            path: '/admin/subjects',
+            element: <AdminSubjectsPage />,
+          },
+          {
+            path: '/admin/topics',
+            element: <AdminTopicsPage />,
+          },
+          {
+            path: '/admin/feedings',
+            element: <AdminFeedingsPage />,
+          },
+          {
+            path: '/admin/wallets',
+            element: <AdminWalletsPage />,
           },
         ],
       },
