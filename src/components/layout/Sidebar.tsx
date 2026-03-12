@@ -16,6 +16,9 @@ import {
   TagsOutlined,
   ThunderboltOutlined,
   WalletOutlined,
+  CheckCircleOutlined,
+  WalletOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -41,6 +44,10 @@ const lectureItems: MenuItem[] = [
   makeItem(<Link to="/lecture/dashboard">Dashboard</Link>, '/lecture/dashboard', <DashboardOutlined />),
   makeItem(<Link to="/lecture/articles">Bài viết của tôi</Link>, '/lecture/articles', <FileTextOutlined />),
   makeItem(<Link to="/lecture/articles/new">Tạo bài viết</Link>, '/lecture/articles/new', <PlusCircleOutlined />),
+  makeItem(<Link to="/lecture/review">Duyệt bài viết</Link>, '/lecture/review', <CheckCircleOutlined />),
+  makeItem(<Link to="/lecture/all-articles">Tất cả bài viết</Link>, '/lecture/all-articles', <BookOutlined />),
+  makeItem(<Link to="/lecture/wallet">Ví của tôi</Link>, '/lecture/wallet', <WalletOutlined />),
+  makeItem(<Link to="/lecture/leaderboard">Bảng xếp hạng</Link>, '/lecture/leaderboard', <TrophyOutlined />),
 ];
 
 const adminItems: MenuItem[] = [

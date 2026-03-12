@@ -43,7 +43,7 @@ export default function EditArticlePage() {
       reset({
         title: article.title,
         contentBody: article.contentBody,
-        topicId: article.topic.topicId,
+        topicId: article.topicId,
       });
     }
   }, [article, reset]);
@@ -116,10 +116,10 @@ export default function EditArticlePage() {
                   }`}
               >
                 <option value={0}>-- Chọn chủ đề --</option>
-                {topics?.map((topic) => (
+                {topics?.data.map((topic) => (
                   <option key={topic.topicId} value={topic.topicId}>
                     {topic.name}
-                    {topic.subject ? ` (${topic.subject.name})` : ''}
+                    {topic.subjectName ? ` (${topic.subjectName})` : ''}
                   </option>
                 ))}
               </select>

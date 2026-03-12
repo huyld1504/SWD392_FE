@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useMyWallets } from '@/hooks/useWallets';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -17,6 +18,9 @@ const { Text } = Typography;
 export default function Header() {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const { data: wallets } = useMyWallets();
+  const mainWallet = wallets?.find((w) => w.walletType === 'MAIN');
+  const earnedWallet = wallets?.find((w) => w.walletType === 'EARNED');
 
   const handleLogout = () => {
     logout();
@@ -68,7 +72,7 @@ export default function Header() {
       }}
     >
       {/* Search */}
-    
+
 
       {/* Right side */}
       <Space size={20} align="center">
@@ -87,7 +91,7 @@ export default function Header() {
           >
             <HeartFilled style={{ color: '#0d9488', fontSize: 12 }} />
             <Text style={{ color: '#0d9488', fontWeight: 700, fontSize: 12 }}>
-              120 BLUE {/* TODO: replace with real wallet balance from GET /api/v1/wallets/me */}
+              {mainWallet?.balance ?? 0} BLUE
             </Text>
           </div>
         )}
@@ -107,13 +111,13 @@ export default function Header() {
           >
             <GoldOutlined style={{ color: '#d97706', fontSize: 12 }} />
             <Text style={{ color: '#d97706', fontWeight: 700, fontSize: 12 }}>
-              0 GOLD {/* TODO: replace with real EARNED wallet balance */}
+              {earnedWallet?.balance ?? 0} GOLD
             </Text>
           </div>
         )}
 
         {/* Notifications */}
-  
+
 
         {/* User avatar + dropdown */}
         <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" trigger={['click']}>
