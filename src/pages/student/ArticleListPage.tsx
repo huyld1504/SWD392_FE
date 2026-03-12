@@ -4,8 +4,9 @@ import { useArticles } from '@/hooks/useArticles';
 import { useTopics, useTopicsBySubject, useSubjects } from '@/hooks/useTopics';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Input, Select, Pagination, Skeleton, Empty, Avatar } from 'antd'; // ← Bỏ Option
-import { HeartFilled, ArrowRightOutlined } from '@ant-design/icons';
+import { Input, Select, Pagination, Skeleton, Empty, Avatar, Button } from 'antd'; // ← Bỏ Option
+import { HeartFilled, ArrowRightOutlined, PlusOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import type { Article } from '@/types';
 
 const GRADIENTS = [
@@ -18,6 +19,10 @@ const GRADIENTS = [
 
 const estimateReadTime = (content: string) =>
   Math.max(1, Math.round((content?.replace(/<[^>]*>/g, '').split(/\s+/).filter(Boolean).length ?? 0) / 200));
+const stripHtml = (html: string) => {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent ?? '';
+};
 
 function ArticleCard({ article }: { article: Article }) {
   const navigate = useNavigate();
@@ -50,7 +55,7 @@ function ArticleCard({ article }: { article: Article }) {
           <span className="px-2 py-px bg-teal-100 text-teal-700 text-xs font-bold uppercase rounded tracking-wide">
             {article.topicName}
           </span>
-          <span className="text-xs text-gray-500">• {readTime} phút</span>
+        
         </div>
 
         {/* Title */}
@@ -60,7 +65,8 @@ function ArticleCard({ article }: { article: Article }) {
 
         {/* Description DÀI */}
         <p className="text-gray-600 text-xs leading-relaxed line-clamp-3 mb-3">
-          {article.contentBody?.replace(/<[^>]*>/g, '').slice(0, 160)}...
+      
+{stripHtml(article.contentBody ?? '').slice(0, 160)}...
         </p>
 
         {/* Bottom bar */}
@@ -136,7 +142,27 @@ export default function ArticleListPage() {
     <div className="max-w-5xl mx-auto">
       {/* Page Title + Filter */}
       <div className="mb-8">
-        <h2 className="text-3xl font-extrabold text-slate-900 mb-6">Danh sách bài viết</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-3xl font-extrabold text-slate-900">Danh sách bài viết</h2>
+          <Link to="/student/my-articles/new">
+            <Button
+              type="primary"
+              size="large"
+              icon={<PlusOutlined />}
+              style={{
+                background: 'linear-gradient(135deg, #0d9488 0%, #065f46 100%)',
+                border: 'none',
+                borderRadius: 10,
+                fontWeight: 700,
+                height: 44,
+                paddingInline: 24,
+                boxShadow: '0 4px 14px rgba(13,148,136,0.35)',
+              }}
+            >
+              Tạo bài viết
+            </Button>
+          </Link>
+        </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', backgroundColor: 'white', padding: '20px', borderRadius: '16px', border: '1px solid #f1f5f9', marginBottom: '24px' }}>
           {/* Search */}

@@ -79,7 +79,11 @@ export default function StudentCreateArticlePage() {
   };
 
   return (
+    
     <div style={{ maxWidth: 860, margin: '0 auto' }}>
+
+
+      
       {/* Breadcrumb */}
       <div style={{ marginBottom: 8, fontSize: 13, color: '#94a3b8' }}>
         <span style={{ cursor: 'pointer' }} onClick={() => navigate('/student/my-articles')}>Bài viết của tôi</span>

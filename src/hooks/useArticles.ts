@@ -13,7 +13,6 @@ export const articleKeys = {
   detail: (id: number) => [...articleKeys.details(), id] as const,
   myArticles: () => [...articleKeys.all, 'my'] as const,
   myList: (params: ArticleParams) => [...articleKeys.myArticles(), params] as const,
-  bookmarks: () => [...articleKeys.all, 'bookmarks'] as const,
 };
 
 // ==================== QUERIES ====================
@@ -40,13 +39,6 @@ export const useMyArticles = (params: ArticleParams) =>
     queryKey: articleKeys.myList(params),
     queryFn: () => articleApi.getMyArticles(params),
     placeholderData: (prev) => prev,
-  });
-
-/** GET bookmarked articles */
-export const useBookmarks = () =>
-  useQuery({
-    queryKey: articleKeys.bookmarks(),
-    queryFn: articleApi.getBookmarks,
   });
 
 // ==================== MUTATIONS ====================
@@ -129,15 +121,4 @@ export const useRejectArticle = () => {
   });
 };
 
-/** TOGGLE bookmark */
-export const useToggleBookmark = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: articleApi.toggleBookmark,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: articleKeys.bookmarks() });
-      queryClient.invalidateQueries({ queryKey: articleKeys.lists() });
-      toast.success('Đã cập nhật bookmark!');
-    },
-  });
-};
+

@@ -11,10 +11,13 @@ import {
   PlusCircleOutlined,
   SettingOutlined,
   HeartOutlined,
-  AppstoreOutlined,
   HistoryOutlined,
-  CheckCircleOutlined,
+  ReadOutlined,
+  TagsOutlined,
+  ThunderboltOutlined,
   WalletOutlined,
+  CheckCircleOutlined,
+
   TrophyOutlined,
 } from '@ant-design/icons';
 
@@ -50,7 +53,10 @@ const lectureItems: MenuItem[] = [
 const adminItems: MenuItem[] = [
   makeItem(<Link to="/admin/dashboard">Dashboard</Link>, '/admin/dashboard', <DashboardOutlined />),
   makeItem(<Link to="/admin/articles">Quản lý bài viết</Link>, '/admin/articles', <FileTextOutlined />),
-  makeItem(<Link to="/admin/subjects">Môn học</Link>, '/admin/subjects', <AppstoreOutlined />),
+  makeItem(<Link to="/admin/subjects">Quản lý Môn học</Link>, '/admin/subjects', <ReadOutlined />),
+  makeItem(<Link to="/admin/topics">Quản lý Chủ đề</Link>, '/admin/topics', <TagsOutlined />),
+  makeItem(<Link to="/admin/feedings">Quản lý Feedings</Link>, '/admin/feedings', <ThunderboltOutlined />),
+  makeItem(<Link to="/admin/wallets">Quản lý Ví</Link>, '/admin/wallets', <WalletOutlined />),
 ];
 
 const bottomItems: MenuItem[] = [

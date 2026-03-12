@@ -91,13 +91,20 @@ export interface Wallet {
 }
 
 // ==================== TRANSACTION ====================
-export type TransactionType = 'CREDIT' | 'DEBIT';
+export type TransactionType =
+  | 'FEEDING'
+  | 'DONATE'
+  | 'RECEIVE_DONATE'
+  | 'CREDIT'
+  | 'DEBIT';
 
 export interface Transaction {
   transactionId: number;
+  transactionType: TransactionType;
   amount: number;
-  type: TransactionType;
-  description?: string;
+  currency: string;
+  counterpartyName?: string;
+  counterpartyEmail?: string | null;
   createdAt: string;
 }
 
@@ -203,4 +210,10 @@ export interface FeedingParams {
   triggerSource?: TriggerSource;
   page?: number;
   size?: number;
+}
+
+export interface BookmarkParams {
+  keyword?: string;
+  page?: number;    // 1-based on frontend
+  pageSize?: number;
 }
