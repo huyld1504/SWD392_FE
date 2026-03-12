@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { walletApi } from '@/api/walletApi';
 import type { WalletAdminParams, WalletStatus } from '@/types';
 import { toast } from 'sonner';
@@ -45,5 +45,21 @@ export const useUpdateWalletStatus = () => {
       toast.success('Cập nhật trạng thái ví thành công!');
     },
     onError: () => toast.error('Không thể cập nhật trạng thái ví!'),
+  });
+};
+export const useCreateEarnedWallet = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: walletApi.createEarned,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: walletKeys.myWallets() });
+      toast.success('Tạo ví EARNED thành công!');
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Không thể tạo ví EARNED!';
+      toast.error(message);
+    },
   });
 };

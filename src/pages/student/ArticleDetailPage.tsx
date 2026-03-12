@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useArticle, useToggleBookmark } from '@/hooks/useArticles';
+import { useArticle } from '@/hooks/useArticles';
+import { useAddBookmark, useRemoveBookmark } from '@/hooks/useBookmarks';
 import { useComments, useCreateComment } from '@/hooks/useComments';
 import { useMyWallets } from '@/hooks/useWallets';
 import { useArticleDonations, useDonate } from '@/hooks/useDonations';
@@ -20,7 +21,17 @@ export default function ArticleDetailPage() {
   const { data: article, isLoading } = useArticle(articleId);
   const { data: comments } = useComments(articleId);
   const { mutate: createComment, isPending: isCommenting } = useCreateComment();
-  const { mutate: toggleBookmark } = useToggleBookmark();
+  const { mutate: addBookmark, isPending: isAddingBookmark } = useAddBookmark();
+  const { mutate: removeBookmark, isPending: isRemovingBookmark } = useRemoveBookmark();
+  const isBookmarkPending = isAddingBookmark || isRemovingBookmark;
+
+  const handleToggleBookmark = () => {
+    if (article?.bookmarked) {
+      removeBookmark(articleId);
+    } else {
+      addBookmark(articleId);
+    }
+  };
 
   const [commentContent, setCommentContent] = useState('');
 
@@ -85,7 +96,7 @@ export default function ArticleDetailPage() {
             <span className="inline-block px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold rounded-full mb-4 tracking-wider uppercase">
               {article.topicName || 'CHỦ ĐỀ'}
             </span>
-            <ArticleStatusBadge status={article.status} />
+          
 
             <Title level={1} className="!text-3xl md:!text-4xl !font-extrabold !leading-tight !text-slate-900 dark:!text-white !mt-4 !mb-0">
               {article.title}
@@ -130,10 +141,7 @@ export default function ArticleDetailPage() {
           {/* Footer Actions */}
           <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button type="text" className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors h-auto">
-                <span className="material-symbols-outlined text-teal-600">thumb_up</span>
-                <span className="text-sm font-bold">1.2k</span>
-              </Button>
+         
               <Button type="text" className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors h-auto">
                 <span className="material-symbols-outlined text-slate-500">chat_bubble</span>
                 <span className="text-sm font-bold">{comments?.length || 0}</span>
@@ -141,7 +149,23 @@ export default function ArticleDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button type="text" shape="circle" icon={<span className="material-symbols-outlined text-slate-500 flex items-center justify-center">share</span>} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-10 h-10" />
-              <Button type="text" shape="circle" onClick={() => toggleBookmark(article.articleId)} icon={<span className="material-symbols-outlined text-slate-500 flex items-center justify-center">bookmark_add</span>} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-10 h-10" />
+              <Button
+                type="text"
+                shape="circle"
+                loading={isBookmarkPending}
+                onClick={handleToggleBookmark}
+                icon={
+                  <span
+                    className={`material-symbols-outlined flex items-center justify-center ${
+                      article.bookmarked ? 'text-yellow-500' : 'text-slate-500'
+                    }`}
+                    style={{ fontVariationSettings: article.bookmarked ? "'FILL' 1" : "'FILL' 0" }}
+                  >
+                    bookmark
+                  </span>
+                }
+                className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors w-10 h-10"
+              />
             </div>
           </div>
 

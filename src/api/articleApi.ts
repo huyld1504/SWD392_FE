@@ -144,16 +144,4 @@ export const articleApi = {
     return res.data.data;
   },
 
-  // POST toggle bookmark (student)
-  toggleBookmark: async (id: number): Promise<void> => {
-    await axiosInstance.post(`/api/v1/articles/${id}/bookmark`);
-  },
-
-  // GET bookmarked articles (student)
-  getBookmarks: async (): Promise<Article[]> => {
-    const res = await axiosInstance.get<ApiResponse<Article[]>>(
-      '/api/v1/articles/bookmarks',
-    );
-    return res.data.data;
-  },
 };

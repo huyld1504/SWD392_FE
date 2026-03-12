@@ -12,13 +12,16 @@ export default function WalletPage() {
   }, [wallets]);
 
   // Date filters
+  const [page, setPage] = useState(1);
   const [fromDate, setFromDate] = useState('2026-03-01');
   const [toDate, setToDate] = useState('2026-03-31');
+  const [filterFrom, setFilterFrom] = useState('2026-03-01');
+  const [filterTo, setFilterTo] = useState('2026-03-31');
 
   // Load transactions
   const { data: transactionsData, isLoading: isLoadingTransactions } = useTransactions(
     mainWallet?.walletId ?? 0,
-    { page: 1, limit: 10, startDate: fromDate, endDate: toDate }
+    { page, size: 10, fromDate: filterFrom, toDate: filterTo }
   );
 
   const transactions = transactionsData?.data || [];
@@ -98,7 +101,10 @@ export default function WalletPage() {
                 onChange={e => setToDate(e.target.value)}
               />
             </div>
-            <button className="bg-teal-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-teal-500 transition-colors border-none cursor-pointer">
+            <button
+              className="bg-teal-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-teal-500 transition-colors border-none cursor-pointer"
+              onClick={() => { setFilterFrom(fromDate); setFilterTo(toDate); setPage(1); }}
+            >
               Lọc
             </button>
           </div>
@@ -122,21 +128,28 @@ export default function WalletPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-teal-500/5">
-                {transactions.map((tx: any) => {
+                {transactions.map((tx) => {
                   const isPositive = tx.amount > 0;
                   const absAmount = Math.abs(tx.amount);
 
-                  // Simple logic to guess icon and color based on amount / transaction type
                   let icon = 'swap_horiz';
                   let iconColors = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600';
 
-                  if (tx.transactionType === 'DEPOSIT' || isPositive) {
+                  if (tx.transactionType === 'FEEDING' || tx.transactionType === 'RECEIVE_DONATE') {
                     icon = 'add';
                     iconColors = 'bg-green-100 dark:bg-green-900/30 text-green-600';
-                  } else if (tx.transactionType === 'WITHDRAWAL' || tx.transactionType === 'DONATE' || !isPositive) {
-                    icon = tx.transactionType === 'DONATE' ? 'favorite' : 'file_download';
+                  } else if (tx.transactionType === 'DONATE') {
+                    icon = 'favorite';
                     iconColors = 'bg-red-100 dark:bg-red-900/30 text-red-600';
                   }
+
+                  const typeLabel: Record<string, string> = {
+                    FEEDING: 'Nhận từ hệ thống',
+                    DONATE: 'Donate',
+                    RECEIVE_DONATE: 'Nhận donate',
+                    CREDIT: 'Cộng tiền',
+                    DEBIT: 'Trừ tiền',
+                  };
 
                   return (
                     <tr key={tx.transactionId} className="hover:bg-teal-500/5 transition-colors group">
@@ -155,22 +168,22 @@ export default function WalletPage() {
                           </div>
                           <div>
                             <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                              {tx.transactionType}
+                              {typeLabel[tx.transactionType] ?? tx.transactionType}
                             </div>
-                            <div className="text-xs text-slate-500 truncate max-w-[200px]" title={tx.description}>
-                              {tx.description}
+                            <div className="text-xs text-slate-500 truncate max-w-[200px]">
+                              {tx.counterpartyName ?? 'Hệ thống'}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className={`px-6 py-5 text-right font-bold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                        {isPositive ? '+' : '-'}{absAmount} BLUE
+                        {isPositive ? '+' : '-'}{absAmount} {tx.currency}
                       </td>
-                      <td className="px-6 py-5 text-right font-medium text-slate-600 dark:text-slate-400">
-                        {tx.status}
+                      <td className="px-6 py-5 text-right text-xs text-slate-400">
+                        {tx.counterpartyEmail ?? '—'}
                       </td>
                     </tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -182,17 +195,37 @@ export default function WalletPage() {
           <p className="text-xs text-slate-500">
             Hiển thị {transactions.length} trên {totalElements} giao dịch
           </p>
-          <div className="flex gap-2">
-            <button className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-colors border-none cursor-pointer">
-              <span className="material-symbols-outlined text-sm">chevron_left</span>
-            </button>
-            <button className="h-8 w-8 rounded bg-teal-600 text-white flex items-center justify-center font-bold text-xs border-none cursor-pointer">1</button>
-            <button className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600/10 font-bold text-xs transition-colors border-none cursor-pointer">2</button>
-            <button className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600/10 font-bold text-xs transition-colors border-none cursor-pointer">3</button>
-            <button className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-colors border-none cursor-pointer">
-              <span className="material-symbols-outlined text-sm">chevron_right</span>
-            </button>
-          </div>
+          {transactionsData && transactionsData.totalPages > 1 && (
+            <div className="flex gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-colors border-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-sm">chevron_left</span>
+              </button>
+              {Array.from({ length: transactionsData.totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`h-8 w-8 rounded font-bold text-xs border-none cursor-pointer transition-colors ${
+                    p === page
+                      ? 'bg-teal-600 text-white'
+                      : 'bg-teal-500/5 text-slate-500 hover:bg-teal-600/10'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={page === transactionsData.totalPages}
+                onClick={() => setPage(p => Math.min(transactionsData.totalPages, p + 1))}
+                className="h-8 w-8 rounded bg-teal-500/5 text-slate-500 flex items-center justify-center hover:bg-teal-600 hover:text-white transition-colors border-none cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-sm">chevron_right</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </main>

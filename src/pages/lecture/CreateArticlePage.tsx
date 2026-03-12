@@ -12,7 +12,7 @@ import {
 } from 'antd';
 import { ArrowLeftOutlined, SendOutlined, InboxOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
-
+import type { RcFile } from 'antd/es/upload';
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
 
@@ -57,11 +57,22 @@ export default function CreateArticlePage() {
     defaultValues: { topicId: 0, contentBody: '' },
   });
 
-  const onSubmit = (data: ArticleForm) => {
-    createArticle(data, {
-      onSuccess: () => navigate('/lecture/articles'),
-    });
-  };
+ const onSubmit = (data: ArticleForm) => {
+  const files = fileList
+    .map((f) => f.originFileObj)
+    .filter((f): f is RcFile => !!f);
+
+  createArticle(
+    {
+      ...data,
+      diagrams: files.length > 0 ? files : undefined,
+      diagramDetails: files.length > 0
+        ? files.map((_, i) => ({ sortOrder: i + 1 }))
+        : undefined,
+    },
+    { onSuccess: () => navigate('/lecture/articles') },
+  );
+};
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto' }}>

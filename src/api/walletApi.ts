@@ -60,9 +60,13 @@ export const walletApi = {
     walletId: number,
     params: WalletTransactionParams = {},
   ): Promise<PaginationResponse<Transaction>> => {
+    const { page = 1, size = 10,fromDate,toDate, ...rest } = params;
     const res = await axiosInstance.get<ApiResponse<PaginationResponse<Transaction>>>(
       `/api/v1/wallets/${walletId}/transactions`,
-      { params },
+      { params: { ...rest, page: page - 1, size,
+         ...(fromDate && { fromDate: `${fromDate}T00:00:00` }),
+        ...(toDate && { toDate: `${toDate}T23:59:59` }),
+       } },
     );
     return res.data.data;
   },

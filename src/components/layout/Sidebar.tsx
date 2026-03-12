@@ -17,7 +17,7 @@ import {
   ThunderboltOutlined,
   WalletOutlined,
   CheckCircleOutlined,
-  WalletOutlined,
+
   TrophyOutlined,
 } from '@ant-design/icons';
 
