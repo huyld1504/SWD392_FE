@@ -26,6 +26,10 @@ import MyArticlesPage from '@/pages/lecture/MyArticlesPage';
 import CreateArticlePage from '@/pages/lecture/CreateArticlePage';
 import EditArticlePage from '@/pages/lecture/EditArticlePage';
 import LectureArticleDetailPage from '@/pages/lecture/ArticleDetailPage';
+import ArticleReviewPage from '@/pages/lecture/ArticleReviewPage';
+import LectureArticleListPage from '@/pages/lecture/ArticleListPage';
+import LectureWalletPage from '@/pages/lecture/WalletPage';
+import LeaderboardPage from '@/pages/lecture/LeaderboardPage';
 
 // Admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -59,7 +63,7 @@ const router = createBrowserRouter([
 
   // ─── Student routes ──────────────────────────
   {
-    element: <ProtectedRoute allowedRoles={['STUDENT', 'ADMIN']} />,
+    element: <ProtectedRoute allowedRoles={['STUDENT', 'ADMIN', 'LECTURE']} />,
     children: [
       {
         element: <MainLayout />,
@@ -135,6 +139,22 @@ const router = createBrowserRouter([
           {
             path: '/lecture/articles/:id',
             element: <LectureArticleDetailPage />,
+          },
+          {
+            path: '/lecture/review',
+            element: <ArticleReviewPage />,
+          },
+          {
+            path: '/lecture/all-articles',
+            element: <LectureArticleListPage />,
+          },
+          {
+            path: '/lecture/wallet',
+            element: <LectureWalletPage />,
+          },
+          {
+            path: '/lecture/leaderboard',
+            element: <LeaderboardPage />,
           },
         ],
       },

@@ -19,10 +19,10 @@ const { Dragger } = Upload;
 const articleSchema = z.object({
   title: z
     .string()
-    .min(5, 'TiÃªu Ä‘á» tá»‘i thiá»ƒu 5 kÃ½ tá»±')
-    .max(255, 'TiÃªu Ä‘á» tá»‘i Ä‘a 255 kÃ½ tá»±'),
-  contentBody: z.string().min(20, 'Ná»™i dung tá»‘i thiá»ƒu 20 kÃ½ tá»±'),
-  topicId: z.number().min(1, 'Vui lÃ²ng chá»n chá»§ Ä‘á»'),
+    .min(5, 'Tiêu đề tối thiểu 5 ký tự')
+    .max(255, 'Tiêu đề tối đa 255 ký tự'),
+  contentBody: z.string().min(20, 'Nội dung tối thiểu 20 ký tự'),
+  topicId: z.number().min(1, 'Vui lòng chọn chủ đề'),
 });
 
 type ArticleForm = z.infer<typeof articleSchema>;
@@ -67,9 +67,9 @@ export default function CreateArticlePage() {
     <div style={{ maxWidth: 860, margin: '0 auto' }}>
       {/* Breadcrumb / back */}
       <div style={{ marginBottom: 8, fontSize: 13, color: '#94a3b8' }}>
-        <span style={{ cursor: 'pointer' }} onClick={() => navigate('/lecture/articles')}>Trang chá»§</span>
+        <span style={{ cursor: 'pointer' }} onClick={() => navigate('/lecture/articles')}>Trang chủ</span>
         <span style={{ margin: '0 6px' }}>/</span>
-        <span style={{ color: '#0f172a', fontWeight: 600 }}>Táº¡o bÃ i viáº¿t</span>
+        <span style={{ color: '#0f172a', fontWeight: 600 }}>Tạo bài viết</span>
       </div>
 
       <Button
@@ -78,22 +78,22 @@ export default function CreateArticlePage() {
         style={{ marginBottom: 24, color: '#64748b', paddingLeft: 0 }}
         onClick={() => navigate(-1)}
       >
-        Quay láº¡i
+        Quay lại
       </Button>
 
       <Card
         style={{ borderRadius: 16, border: '1px solid #e2e8f0' }}
         bodyStyle={{ padding: '36px 40px' }}
       >
-        <Title level={3} style={{ margin: '0 0 4px', fontWeight: 800 }}>Táº¡o bÃ i viáº¿t má»›i</Title>
+        <Title level={3} style={{ margin: '0 0 4px', fontWeight: 800 }}>Tạo bài viết mới</Title>
         <Text style={{ color: '#64748b', display: 'block', marginBottom: 32 }}>
-          Chia sáº» kiáº¿n thá»©c vÃ  tÃ i liá»‡u cá»§a báº¡n vá»›i cá»™ng Ä‘á»“ng sinh viÃªn.
+          Chia sẻ kiến thức và tài liệu của bạn với cộng đồng sinh viên.
         </Text>
 
         <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
           {/* Topic */}
           <Form.Item
-            label={<span style={{ fontWeight: 600 }}>Chá»§ Ä‘á» <span style={{ color: '#ef4444' }}>*</span></span>}
+            label={<span style={{ fontWeight: 600 }}>Chủ đề <span style={{ color: '#ef4444' }}>*</span></span>}
             validateStatus={errors.topicId ? 'error' : ''}
             help={errors.topicId?.message}
           >
@@ -104,7 +104,7 @@ export default function CreateArticlePage() {
                 <Select
                   {...field}
                   size="large"
-                  placeholder="-- Chá»n chá»§ Ä‘á» --"
+                  placeholder="-- Chọn chủ đề --"
                   loading={topicsLoading}
                   style={{ width: '100%', borderRadius: 8 }}
                   onChange={(val) => field.onChange(Number(val))}
@@ -113,7 +113,7 @@ export default function CreateArticlePage() {
                 >
                   {topics.map((t) => (
                     <Select.Option key={t.topicId} value={t.topicId}>
-                      {t.name}{t.subjectName ? ` â€” ${t.subjectName}` : ''}
+                      {t.name}{t.subjectName ? ` — ${t.subjectName}` : ''}
                     </Select.Option>
                   ))}
                 </Select>
@@ -123,7 +123,7 @@ export default function CreateArticlePage() {
 
           {/* Title */}
           <Form.Item
-            label={<span style={{ fontWeight: 600 }}>TiÃªu Ä‘á» <span style={{ color: '#ef4444' }}>*</span></span>}
+            label={<span style={{ fontWeight: 600 }}>Tiêu đề <span style={{ color: '#ef4444' }}>*</span></span>}
             validateStatus={errors.title ? 'error' : ''}
             help={errors.title?.message}
           >
@@ -134,7 +134,7 @@ export default function CreateArticlePage() {
                 <Input
                   {...field}
                   size="large"
-                  placeholder="Nháº­p tiÃªu Ä‘á» bÃ i viáº¿t..."
+                  placeholder="Nhập tiêu đề bài viết..."
                   maxLength={255}
                   showCount
                   style={{ borderRadius: 8 }}
@@ -145,7 +145,7 @@ export default function CreateArticlePage() {
 
           {/* Content */}
           <Form.Item
-            label={<span style={{ fontWeight: 600 }}>Ná»™i dung <span style={{ color: '#ef4444' }}>*</span></span>}
+            label={<span style={{ fontWeight: 600 }}>Nội dung <span style={{ color: '#ef4444' }}>*</span></span>}
             validateStatus={errors.contentBody ? 'error' : ''}
             help={errors.contentBody?.message}
           >
@@ -163,7 +163,7 @@ export default function CreateArticlePage() {
                     modules={modules}
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder="Báº¯t Ä‘áº§u viáº¿t ná»™i dung bÃ i viáº¿t táº¡i Ä‘Ã¢y..."
+                    placeholder="Bắt đầu viết nội dung bài viết tại đây..."
                   />
                 </div>
               )}
@@ -171,7 +171,7 @@ export default function CreateArticlePage() {
           </Form.Item>
 
           {/* Image upload */}
-          <Form.Item label={<span style={{ fontWeight: 600 }}>SÆ¡ Ä‘á»“ / HÃ¬nh áº£nh Ä‘Ã­nh kÃ¨m</span>}>
+          <Form.Item label={<span style={{ fontWeight: 600 }}>Sơ đồ / Hình ảnh đính kèm</span>}>
             <Dragger
               listType="picture"
               fileList={fileList}
@@ -185,19 +185,19 @@ export default function CreateArticlePage() {
                 <InboxOutlined style={{ color: '#0d9488', fontSize: 32 }} />
               </p>
               <p style={{ color: '#64748b', margin: '8px 0 4px' }}>
-                KÃ©o tháº£ file vÃ o Ä‘Ã¢y hoáº·c <span style={{ color: '#0d9488', fontWeight: 600 }}>Click Ä‘á»ƒ chá»n</span>
+                Kéo file và vào đây hoặc <span style={{ color: '#0d9488', fontWeight: 600 }}>Click để chọn</span>
               </p>
-              <p style={{ fontSize: 12, color: '#94a3b8' }}>PNG, JPG, SVG (tá»‘i Ä‘a 10MB)</p>
+              <p style={{ fontSize: 12, color: '#94a3b8' }}>PNG, JPG, SVG (tối đa 10MB)</p>
             </Dragger>
           </Form.Item>
 
           {/* Actions */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 8, borderTop: '1px solid #f1f5f9' }}>
             <Text style={{ fontSize: 12, color: '#94a3b8' }}>
-              * CÃ¡c trÆ°á»ng cÃ³ dáº¥u sao lÃ  báº¯t buá»™c. BÃ i viáº¿t sáº½ Ä‘Æ°á»£c kiá»ƒm duyá»‡t trÆ°á»›c khi hiá»ƒn thá»‹ cÃ´ng khai.
+              * Các trường có dấu sao là bắt buộc. Bài viết sẽ được kiểm duyệt trước khi hiển thị công khai.
             </Text>
             <Space>
-              <Button size="large" style={{ borderRadius: 8 }} onClick={() => navigate(-1)}>Há»§y</Button>
+              <Button size="large" style={{ borderRadius: 8 }} onClick={() => navigate(-1)}>Hủy</Button>
               <Button
                 type="primary"
                 htmlType="submit"
@@ -206,7 +206,7 @@ export default function CreateArticlePage() {
                 icon={<SendOutlined />}
                 style={{ background: '#0d9488', borderColor: '#0d9488', borderRadius: 8, fontWeight: 700 }}
               >
-                ÄÄƒng bÃ i viáº¿t
+                Đăng bài viết
               </Button>
             </Space>
           </div>

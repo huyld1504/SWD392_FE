@@ -15,25 +15,25 @@ export default function LectureDashboard() {
   const stats = [
     {
       label: 'Chờ duyệt',
-      value: pendingData?.total || 0,
+      value: pendingData?.totalItems || 0,
       icon: <Clock size={24} />,
       color: 'bg-yellow-100 text-yellow-600',
     },
     {
       label: 'Đã duyệt',
-      value: approvedData?.total || 0,
+      value: approvedData?.totalItems || 0,
       icon: <CheckCircle size={24} />,
       color: 'bg-green-100 text-green-600',
     },
     {
       label: 'Bị từ chối',
-      value: rejectedData?.total || 0,
+      value: rejectedData?.totalItems || 0,
       icon: <XCircle size={24} />,
       color: 'bg-red-100 text-red-600',
     },
     {
       label: 'Tổng bài viết',
-      value: recentArticles?.total || 0,
+      value: recentArticles?.totalItems || 0,
       icon: <FileText size={24} />,
       color: 'bg-teal-100 text-teal-600',
     },
@@ -94,7 +94,7 @@ export default function LectureDashboard() {
               <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
             ))}
           </div>
-        ) : recentArticles?.items.length === 0 ? (
+        ) : recentArticles?.data.length === 0 ? (
           <div className="text-center py-8">
             <FileText className="mx-auto text-gray-300 mb-3" size={40} />
             <p className="text-gray-500">Bạn chưa có bài viết nào</p>
@@ -107,7 +107,7 @@ export default function LectureDashboard() {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentArticles?.items.map((article: any) => {
+            {recentArticles?.data.map((article: any) => {
               return (
                 <Link
                   key={article.articleId}
