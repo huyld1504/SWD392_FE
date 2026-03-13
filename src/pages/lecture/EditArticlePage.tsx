@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useArticle, useUpdateArticle } from '@/hooks/useArticles';
 import { useTopics } from '@/hooks/useTopics';
-import { ArrowLeft, Save } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft, Save, X, ImagePlus } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const articleSchema = z.object({
@@ -28,10 +30,16 @@ export default function EditArticlePage() {
   const { data: topics, isLoading: topicsLoading } = useTopics();
   const { mutate: updateArticle, isPending } = useUpdateArticle();
 
+  // Image state
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<ArticleForm>({
     resolver: zodResolver(articleSchema),
@@ -48,9 +56,28 @@ export default function EditArticlePage() {
     }
   }, [article, reset]);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setNewImages(files);
+    const previews = files.map((f) => URL.createObjectURL(f));
+    setNewImagePreviews(previews);
+  };
+
+  const removeNewImage = (idx: number) => {
+    setNewImages((prev) => prev.filter((_, i) => i !== idx));
+    setNewImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const onSubmit = (data: ArticleForm) => {
     updateArticle(
-      { id: articleId, data },
+      {
+        id: articleId,
+        data: {
+          ...data,
+          ...(newImages.length > 0 ? { diagrams: newImages } : {}),
+        },
+      },
       { onSuccess: () => navigate('/lecture/articles') },
     );
   };
@@ -112,8 +139,9 @@ export default function EditArticlePage() {
             ) : (
               <select
                 {...register('topicId', { valueAsNumber: true })}
-                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${errors.topicId ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${
+                  errors.topicId ? 'border-red-300' : 'border-gray-300'
+                }`}
               >
                 <option value={0}>-- Chọn chủ đề --</option>
                 {topics?.data.map((topic) => (
@@ -137,8 +165,9 @@ export default function EditArticlePage() {
             <input
               {...register('title')}
               placeholder="Nhập tiêu đề bài viết..."
-              className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${errors.title ? 'border-red-300' : 'border-gray-300'
-                }`}
+              className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${
+                errors.title ? 'border-red-300' : 'border-gray-300'
+              }`}
             />
             {errors.title && (
               <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
@@ -150,21 +179,106 @@ export default function EditArticlePage() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Nội dung <span className="text-red-500">*</span>
             </label>
-            <textarea
-              {...register('contentBody')}
-              rows={15}
-              placeholder="Viết nội dung bài viết tại đây... (Hỗ trợ HTML)"
-              className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all resize-y min-h-[200px] ${errors.contentBody ? 'border-red-300' : 'border-gray-300'
-                }`}
-            />
+            <div className={`${errors.contentBody ? 'border-red-300' : ''}`}>
+              <Controller
+                name="contentBody"
+                control={control}
+                render={({ field }) => (
+                  <ReactQuill
+                    theme="snow"
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Viết nội dung bài viết tại đây..."
+                    className="bg-white h-[300px] mb-12"
+                    modules={{
+                      toolbar: [
+                        [{ header: [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+                        ['link'],
+                        ['clean']
+                      ],
+                    }}
+                  />
+                )}
+              />
+            </div>
             {errors.contentBody && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.contentBody.message}
-              </p>
+              <p className="mt-1 text-sm text-red-600">{errors.contentBody.message}</p>
             )}
-            <p className="mt-1 text-xs text-gray-400">
-              Bạn có thể sử dụng HTML để định dạng nội dung
-            </p>
+          </div>
+
+          {/* Images */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Hình ảnh minh họa
+            </label>
+
+            {/* Existing images from article */}
+            {article.diagrams && article.diagrams.length > 0 && newImages.length === 0 && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-400 mb-2">Ảnh hiện tại:</p>
+                <div className="flex flex-wrap gap-3">
+                  {article.diagrams.map((diagram) => (
+                    <div key={diagram.diagramId} className="relative group">
+                      <img
+                        src={diagram.imageUrl}
+                        alt={diagram.caption || 'Diagram'}
+                        className="w-28 h-20 object-cover rounded-lg border border-gray-200"
+                      />
+                      {diagram.caption && (
+                        <p className="text-[10px] text-gray-400 mt-1 text-center truncate max-w-[112px]">
+                          {diagram.caption}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-amber-600 mt-2">
+                  Tải lên ảnh mới sẽ thay thế các ảnh hiện tại.
+                </p>
+              </div>
+            )}
+
+            {/* New image previews */}
+            {newImagePreviews.length > 0 && (
+              <div className="flex flex-wrap gap-3 mb-3">
+                {newImagePreviews.map((src, idx) => (
+                  <div key={idx} className="relative group">
+                    <img
+                      src={src}
+                      alt={`preview-${idx}`}
+                      className="w-28 h-20 object-cover rounded-lg border border-teal-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeNewImage(idx)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload button */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-colors cursor-pointer"
+            >
+              <ImagePlus size={16} />
+              {newImages.length > 0 ? `Đã chọn ${newImages.length} ảnh — Đổi ảnh` : 'Thêm / đổi ảnh'}
+            </button>
           </div>
 
           {/* Actions */}
@@ -178,7 +292,7 @@ export default function EditArticlePage() {
             </button>
             <button
               type="submit"
-              disabled={isPending || !isDirty}
+              disabled={isPending || (!isDirty && newImages.length === 0)}
               className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
             >
               <Save size={16} />

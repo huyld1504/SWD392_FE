@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useArticles } from '@/hooks/useArticles';
 import { useTopics, useSubjects } from '@/hooks/useTopics';
+import { useMyWallets, useTransactions } from '@/hooks/useWallets';
 import { useAuthStore } from '@/stores/authStore';
 import type { Article } from '@/types';
 
@@ -27,6 +28,11 @@ const CARD_GRADIENTS = [
   'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
 ];
 
+const WALLET_STATUS_MAP = {
+  ACTIVE: { label: 'Đang hoạt động', color: 'rgba(255,255,255,0.2)' },
+  LOCKED: { label: 'Bị khóa', color: 'rgba(240, 12, 12, 0.4)' },
+};
+
 function ArticleCard({ article, index }: { article: Article; index: number }) {
   const thumbnailUrl = article.diagrams?.[0]?.imageUrl;
   const topicColor = '#0d9488';
@@ -37,23 +43,25 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
       bodyStyle={{ padding: '20px 20px 16px' }}
       style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0', height: '100%' }}
       cover={
-        thumbnailUrl ? (
-          <div style={{ height: 192, overflow: 'hidden' }}>
-            <img
-              src={thumbnailUrl}
-              alt={article.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+        <Link to={`/student/articles/${article.articleId}`} style={{ display: 'block' }}>
+          {thumbnailUrl ? (
+            <div style={{ height: 192, overflow: 'hidden' }}>
+              <img
+                src={thumbnailUrl}
+                alt={article.title}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }}
+              />
+            </div>
+          ) : (
+            <div
+              style={{
+                height: 192,
+                background: CARD_GRADIENTS[index % CARD_GRADIENTS.length],
+                position: 'relative',
+              }}
             />
-          </div>
-        ) : (
-          <div
-            style={{
-              height: 192,
-              background: CARD_GRADIENTS[index % CARD_GRADIENTS.length],
-              position: 'relative',
-            }}
-          />
-        )
+          )}
+        </Link>
       }
     >
       {/* Topic badge — overlay on cover */}
@@ -125,12 +133,19 @@ function ArticleCard({ article, index }: { article: Article; index: number }) {
 
 export default function StudentDashboard() {
   const user = useAuthStore((s) => s.user);
+  const { data: myWallets, isLoading: isWalletLoading } = useMyWallets();
+  const mainWallet = myWallets?.find((w) => w.walletType === 'MAIN') ?? myWallets?.[0];
+  const { data: walletTransactions, isLoading: isTxLoading } = useTransactions(mainWallet?.walletId ?? 0, {
+    page: 1,
+    size: 1,
+  });
+
   const { data: recentArticles, isLoading } = useArticles({
-  page: 1,        
-  pageSize: 10,
-  status: 'APPROVED',
-  sort: 'createdAt',
-  direction: 'desc',
+    page: 1,
+    pageSize: 10,
+    status: 'APPROVED',
+    sort: 'createdAt',
+    direction: 'desc',
   });
   const { data: topicsPage } = useTopics();
   const topics = topicsPage?.data ?? [];
@@ -225,7 +240,7 @@ export default function StudentDashboard() {
                 </Text>
                 <span
                   style={{
-                    background: 'rgba(255,255,255,0.2)',
+                    background: WALLET_STATUS_MAP[mainWallet?.status as keyof typeof WALLET_STATUS_MAP]?.color || 'rgba(255,255,255,0.2)',
                     backdropFilter: 'blur(8px)',
                     padding: '3px 12px',
                     borderRadius: 999,
@@ -235,32 +250,37 @@ export default function StudentDashboard() {
                     letterSpacing: '0.1em',
                   }}
                 >
-                  Đang hoạt động
+                  {WALLET_STATUS_MAP[mainWallet?.status as keyof typeof WALLET_STATUS_MAP]?.label || mainWallet?.status}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <WalletFilled style={{ fontSize: 36 }} />
                 <span style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-0.02em' }}>
-                  120 BLUE
+                  {isWalletLoading ? (
+                    <Skeleton.Input style={{ width: 120 }} active size="small" />
+                  ) : (
+                    `${mainWallet?.balance ?? 0} ${mainWallet?.currency ?? ''}`
+                  )}
                 </span>
               </div>
             </div>
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: 12, position: 'relative', zIndex: 1, marginTop: 24 }}>
-              
-              <Button
-                icon={<HistoryOutlined />}
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  borderRadius: 8,
-                  fontWeight: 700,
-                }}
-              >
-                Lịch sử
-              </Button>
+              <Link to="/student/wallet">
+                <Button
+                  icon={<HistoryOutlined />}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)',
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: 8,
+                    fontWeight: 700,
+                  }}
+                >
+                  Lịch sử
+                </Button>
+              </Link>
             </div>
           </div>
         </Col>
@@ -282,17 +302,21 @@ export default function StudentDashboard() {
                   </div>
                   <Text style={{ fontWeight: 500 }}>BLUE còn lại</Text>
                 </Space>
-                <Text strong style={{ fontSize: 18 }}>120</Text>
+                <Text strong style={{ fontSize: 18 }}>
+                  {isWalletLoading ? <Skeleton.Input style={{ width: 40 }} active size="small" /> : mainWallet?.balance ?? 0}
+                </Text>
               </div>
-          
+
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Space size={12}>
                   <div style={{ width: 40, height: 40, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <HeartOutlined style={{ color: '#22c55e', fontSize: 18 }} />
                   </div>
-                  <Text style={{ fontWeight: 500 }}>Lần đã donate</Text>
+                  <Text style={{ fontWeight: 500 }}>Số giao dịch</Text>
                 </Space>
-                <Text strong style={{ fontSize: 18 }}>15</Text>
+                <Text strong style={{ fontSize: 18 }}>
+                  {isTxLoading ? <Skeleton.Input style={{ width: 32 }} active size="small" /> : walletTransactions?.totalItems ?? 0}
+                </Text>
               </div>
             </Space>
           </Card>
@@ -331,7 +355,7 @@ export default function StudentDashboard() {
       </div>
 
       {/*  Topics */}
-    
+
       <div style={{ marginBottom: 40 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <Title level={5} style={{ margin: 0, fontWeight: 700 }}>Chủ đề phổ biến </Title>

@@ -16,7 +16,7 @@ export default function AdminArticlesPage() {
   const [rejectReason, setRejectReason] = useState('');
 
   const { data, isLoading } = useArticles({
-    page: page ,
+    page: page,
     pageSize: 10,
     // status: statusFilter || undefined,
   });
@@ -134,7 +134,7 @@ export default function AdminArticlesPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() =>
-                          navigate(`/student/articles/${article.articleId}`)
+                          navigate(`/lecture/articles/${article.articleId}`)
                         }
                         className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Xem"

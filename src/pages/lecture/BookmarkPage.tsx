@@ -166,7 +166,7 @@ export default function BookmarkPage() {
           }
         >
           {!keyword && (
-            <Button type="primary" onClick={() => navigate('/student/articles')}
+            <Button type="primary" onClick={() => navigate('/lecture/all-articles')}
               style={{ background: '#0d9488', borderColor: '#0d9488' }}>
               Khám phá bài viết
             </Button>
@@ -184,7 +184,7 @@ export default function BookmarkPage() {
                     const isChecked = selectedIds.includes(article.articleId);
                     toggleSelect(article.articleId, !isChecked);
                   } else {
-                    navigate(`/student/articles/${article.articleId}`);
+                    navigate(`/lecture/articles/${article.articleId}`);
                   }
                 }}
               >
@@ -266,7 +266,7 @@ export default function BookmarkPage() {
 
           {total > PAGE_SIZE && (
             <div className="flex justify-center mt-8 pb-8">
-              <Pagination
+               <Pagination
                 current={page}
                 total={total}
                 pageSize={PAGE_SIZE}

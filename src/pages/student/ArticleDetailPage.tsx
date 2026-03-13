@@ -82,6 +82,7 @@ export default function ArticleDetailPage() {
     <div className="flex-1 overflow-y-auto w-full font-sans">
       <div className="max-w-[1200px] mx-auto px-6 py-8 flex items-start gap-10 flex-col lg:flex-row">
         {/* Article Content Column */}
+
         <article className="flex-1 w-full min-w-0 lg:w-[calc(100%-360px)]">
           <Button
             type="text"
@@ -96,33 +97,61 @@ export default function ArticleDetailPage() {
             <span className="inline-block px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 text-xs font-bold rounded-full mb-4 tracking-wider uppercase">
               {article.topicName || 'CHỦ ĐỀ'}
             </span>
-          
+
 
             <Title level={1} className="!text-3xl md:!text-4xl !font-extrabold !leading-tight !text-slate-900 dark:!text-white !mt-4 !mb-0">
               {article.title}
             </Title>
           </div>
 
-          <div className="flex items-center gap-4 mb-10 pb-10 border-b border-slate-100 dark:border-slate-800">
-            <Avatar
-              size={48}
-              src={article.author?.avatarUrl || "https://ui-avatars.com/api/?name=" + (article.author?.name || "A")}
-              className="border-2 border-slate-100"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <Text strong className="text-slate-900 dark:text-white text-base">{article.author?.name || 'Tác giả ẩn danh'}</Text>
-                {article.author?.role === 'LECTURE' && (
-                  <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase tracking-wide">
-                    Giảng viên
-                  </span>
-                )}
+          <div className="flex items-center justify-between gap-4 mb-10 pb-10 border-b border-slate-100 dark:border-slate-800 flex-wrap">
+            <div className="flex items-center gap-4">
+              <Avatar
+                size={48}
+                src={article.author?.avatarUrl || "https://ui-avatars.com/api/?name=" + (article.author?.name || "A")}
+                className="border-2 border-slate-100"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <Text strong className="text-slate-900 dark:text-white text-base">{article.author?.name || 'Tác giả ẩn danh'}</Text>
+                  {article.author?.role === 'LECTURE' && (
+                    <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold rounded uppercase tracking-wide">
+                      Giảng viên
+                    </span>
+                  )}
+                </div>
+                <Text className="text-sm text-slate-500 block mt-1">
+                  Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} • 12 phút đọc
+                </Text>
               </div>
-              <Text className="text-sm text-slate-500 block mt-1">
-                Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} • 12 phút đọc
-              </Text>
             </div>
+            
+            {/* Large Bookmark Button */}
+            <Button
+              type={article.bookmarked ? "primary" : "default"}
+              size="large"
+              loading={isBookmarkPending}
+              onClick={handleToggleBookmark}
+              icon={
+                <span
+                  className={`material-symbols-outlined flex items-center justify-center ${
+                    article.bookmarked ? '' : 'text-slate-500 group-hover:text-teal-600'
+                  }`}
+                  style={{ fontVariationSettings: article.bookmarked ? "'FILL' 1" : "'FILL' 0", fontSize: '20px' }}
+                >
+                  bookmark
+                </span>
+              }
+              className={`flex items-center gap-2 rounded-full px-6 font-semibold shadow-sm group ${
+                article.bookmarked 
+                  ? 'bg-teal-600 hover:bg-teal-500 border-none' 
+                  : 'bg-white border-slate-200 hover:border-teal-600 hover:text-teal-600 text-slate-600 dark:bg-slate-900 dark:border-slate-700 dark:hover:border-teal-500 dark:text-slate-300'
+              }`}
+            >
+              {article.bookmarked ? 'Đã lưu' : 'Lưu bài viết'}
+            </Button>
           </div>
+
 
           <div className="prose prose-slate max-w-none dark:prose-invert">
             {article.diagrams && article.diagrams.length > 0 && (
@@ -138,10 +167,13 @@ export default function ArticleDetailPage() {
             )}
           </div>
 
+
+
+
           {/* Footer Actions */}
           <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
-         
+
               <Button type="text" className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors h-auto">
                 <span className="material-symbols-outlined text-slate-500">chat_bubble</span>
                 <span className="text-sm font-bold">{comments?.length || 0}</span>
@@ -156,9 +188,8 @@ export default function ArticleDetailPage() {
                 onClick={handleToggleBookmark}
                 icon={
                   <span
-                    className={`material-symbols-outlined flex items-center justify-center ${
-                      article.bookmarked ? 'text-yellow-500' : 'text-slate-500'
-                    }`}
+                    className={`material-symbols-outlined flex items-center justify-center ${article.bookmarked ? 'text-yellow-500' : 'text-slate-500'
+                      }`}
                     style={{ fontVariationSettings: article.bookmarked ? "'FILL' 1" : "'FILL' 0" }}
                   >
                     bookmark

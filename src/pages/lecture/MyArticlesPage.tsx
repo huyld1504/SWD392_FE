@@ -230,26 +230,7 @@ export default function MyArticlesPage() {
       </Card>
 
       {/* Stats */}
-      <Row gutter={16}>
-        {[
-          { label: 'Tổng lượt xem', value: '—', extra: null, icon: <EyeOutlined style={{ color: '#0d9488', fontSize: 20 }} /> },
-          { label: 'Thành tựu', value: 'Badge Bạc', extra: null, icon: <StarFilled style={{ color: '#f59e0b', fontSize: 20 }} /> },
-          { label: 'Tương tác', value: '—', extra: null, icon: <MessageOutlined style={{ color: '#6366f1', fontSize: 20 }} /> },
-          { label: 'Hài lòng', value: '—', extra: null, icon: <HeartOutlined style={{ color: '#f43f5e', fontSize: 20 }} /> },
-        ].map((stat) => (
-          <Col key={stat.label} xs={24} sm={12} lg={6}>
-            <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} bodyStyle={{ padding: '20px 24px' }}>
-              <Text style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>
-                {stat.label}
-              </Text>
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-                <Text strong style={{ fontSize: 22, color: '#0f172a' }}>{stat.value}</Text>
-                {stat.icon}
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+
 
       {/* Delete confirm modal */}
       <Modal

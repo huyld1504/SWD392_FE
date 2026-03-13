@@ -1,3 +1,2 @@
-// Lecture views the same article detail as student
-// Re-export with lecture-specific context
-export { default } from '@/pages/student/ArticleDetailPage';
+// Lecture article detail with approve/reject actions for PENDING articles
+export { default } from '@/pages/lecture/LectureArticleDetailPage';

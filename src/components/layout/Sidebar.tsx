@@ -35,6 +35,7 @@ const makeItem = (label: React.ReactNode, key: string, icon: React.ReactNode): M
 const studentItems: MenuItem[] = [
   makeItem(<Link to="/student/dashboard">Dashboard</Link>, '/student/dashboard', <DashboardOutlined />),
   makeItem(<Link to="/student/articles">Bài viết</Link>, '/student/articles', <BookOutlined />),
+  makeItem(<Link to ="student/my-articles/new">Tạo bài viết</Link>, 'student/my-articles/new', <PlusCircleOutlined />),
   makeItem(<Link to="/student/bookmarks">Bài đã lưu</Link>, '/student/bookmarks', <SaveOutlined />),
   makeItem(<Link to="/student/wallet">Lịch sử donate</Link>, '/student/wallet ', <HistoryOutlined />),
   makeItem(<Link to="/student/my-articles">Bài viết của tôi</Link>, '/student/my-articles', <HeartOutlined />),
@@ -46,6 +47,7 @@ const lectureItems: MenuItem[] = [
   makeItem(<Link to="/lecture/articles/new">Tạo bài viết</Link>, '/lecture/articles/new', <PlusCircleOutlined />),
   makeItem(<Link to="/lecture/review">Duyệt bài viết</Link>, '/lecture/review', <CheckCircleOutlined />),
   makeItem(<Link to="/lecture/all-articles">Tất cả bài viết</Link>, '/lecture/all-articles', <BookOutlined />),
+  makeItem(<Link to="/lecture/bookmarks">Bài đã lưu</Link>, '/lecture/bookmarks', <SaveOutlined />),
   makeItem(<Link to="/lecture/wallet">Ví của tôi</Link>, '/lecture/wallet', <WalletOutlined />),
   makeItem(<Link to="/lecture/leaderboard">Bảng xếp hạng</Link>, '/lecture/leaderboard', <TrophyOutlined />),
 ];
