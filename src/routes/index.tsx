@@ -30,6 +30,7 @@ import ArticleReviewPage from '@/pages/lecture/ArticleReviewPage';
 import LectureArticleListPage from '@/pages/lecture/ArticleListPage';
 import LectureWalletPage from '@/pages/lecture/WalletPage';
 import LeaderboardPage from '@/pages/lecture/LeaderboardPage';
+import LectureBookmarkPage from '@/pages/lecture/BookmarkPage';
 
 // Admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -159,6 +160,10 @@ const router = createBrowserRouter([
           {
             path: '/lecture/leaderboard',
             element: <LeaderboardPage />,
+          },
+          {
+            path: '/lecture/bookmarks',
+            element: <LectureBookmarkPage />,
           },
         ],
       },

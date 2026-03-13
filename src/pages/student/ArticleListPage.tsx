@@ -55,7 +55,7 @@ function ArticleCard({ article }: { article: Article }) {
           <span className="px-2 py-px bg-teal-100 text-teal-700 text-xs font-bold uppercase rounded tracking-wide">
             {article.topicName}
           </span>
-        
+
         </div>
 
         {/* Title */}
@@ -65,8 +65,8 @@ function ArticleCard({ article }: { article: Article }) {
 
         {/* Description DÀI */}
         <p className="text-gray-600 text-xs leading-relaxed line-clamp-3 mb-3">
-      
-{stripHtml(article.contentBody ?? '').slice(0, 160)}...
+
+          {stripHtml(article.contentBody ?? '').slice(0, 160)}...
         </p>
 
         {/* Bottom bar */}
@@ -95,7 +95,7 @@ function ArticleCard({ article }: { article: Article }) {
             </div>
           </div>
 
-        
+
         </div>
       </div>
     </article>
@@ -183,7 +183,7 @@ export default function ArticleListPage() {
             />
           </div>
 
-<div style={{ flex: '0 1 280px' }}>
+          {/* <div style={{ flex: '0 1 280px' }}>
             <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Môn học</p>
             <Select
               style={{ width: '100%' }}
@@ -203,7 +203,7 @@ export default function ArticleListPage() {
                 </Select.Option>
               ))}
             </Select>
-          </div>
+          </div> */}
 
 
           {/* Topic */}

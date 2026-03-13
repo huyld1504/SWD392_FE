@@ -19,7 +19,7 @@ export default function LectureWalletPage() {
 
   const { data: txData, isLoading: isLoadingTx } = useTransactions(
     selectedWallet?.walletId ?? 0,
-    { page: txPage - 1, size: 10, fromDate, toDate },
+    { page: txPage, size: 10, fromDate, toDate },
   );
 
   const transactions = txData?.data || [];
@@ -151,23 +151,34 @@ export default function LectureWalletPage() {
                 <tr>
                   <th className="px-6 py-4">Thời gian</th>
                   <th className="px-6 py-4">Loại giao dịch</th>
+                  <th className="px-6 py-4">Đối tác</th>
                   <th className="px-6 py-4 text-right">Số tiền</th>
-                  <th className="px-6 py-4 text-right">Mô tả</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-teal-500/5">
                 {transactions.map((tx: any) => {
-                  const isPositive = tx.amount > 0;
-                  const absAmount = Math.abs(tx.amount);
-                  let icon = 'swap_horiz';
-                  let iconColors = 'bg-blue-100 text-blue-600';
-                  if (tx.transactionType === 'DEPOSIT' || isPositive) {
-                    icon = 'add';
-                    iconColors = 'bg-green-100 text-green-600';
-                  } else if (tx.transactionType === 'WITHDRAWAL' || tx.transactionType === 'DONATE' || !isPositive) {
-                    icon = tx.transactionType === 'DONATE' ? 'favorite' : 'file_download';
-                    iconColors = 'bg-red-100 text-red-600';
-                  }
+                  const INCOMING_TYPES = ['RECEIVE_DONATE', 'CREDIT', 'FEEDING'];
+                  const isIncoming = INCOMING_TYPES.includes(tx.transactionType);
+
+                  const TX_LABELS: Record<string, string> = {
+                    RECEIVE_DONATE: 'Nhận ủng hộ',
+                    DONATE: 'Ủng hộ',
+                    FEEDING: 'Nhận thưởng',
+                    CREDIT: 'Nạp tiền',
+                    DEBIT: 'Rút tiền',
+                  };
+                  const TX_ICONS: Record<string, string> = {
+                    RECEIVE_DONATE: 'favorite',
+                    DONATE: 'favorite',
+                    FEEDING: 'bolt',
+                    CREDIT: 'add_circle',
+                    DEBIT: 'remove_circle',
+                  };
+
+                  const label = TX_LABELS[tx.transactionType] ?? tx.transactionType;
+                  const icon = TX_ICONS[tx.transactionType] ?? 'swap_horiz';
+                  const iconColors = isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
+
                   return (
                     <tr key={tx.transactionId} className="hover:bg-teal-500/5 transition-colors">
                       <td className="px-6 py-5">
@@ -183,16 +194,24 @@ export default function LectureWalletPage() {
                           <div className={`h-8 w-8 rounded-full flex items-center justify-center ${iconColors}`}>
                             <span className="material-symbols-outlined text-sm">{icon}</span>
                           </div>
-                          <div>
-                            <div className="text-sm font-semibold text-slate-800">{tx.transactionType}</div>
-                            <div className="text-xs text-slate-500 truncate max-w-[200px]">{tx.description}</div>
-                          </div>
+                          <span className="text-sm font-semibold text-slate-800">{label}</span>
                         </div>
                       </td>
-                      <td className={`px-6 py-5 text-right font-bold ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                        {isPositive ? '+' : '-'}{absAmount} {activeWallet === 'MAIN' ? 'BLUE' : 'GOLD'}
+                      <td className="px-6 py-5">
+                        {tx.counterpartyName ? (
+                          <div>
+                            <div className="text-sm font-medium text-slate-800">{tx.counterpartyName}</div>
+                            {tx.counterpartyEmail && (
+                              <div className="text-xs text-slate-400">{tx.counterpartyEmail}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400 text-sm">—</span>
+                        )}
                       </td>
-                      <td className="px-6 py-5 text-right font-medium text-slate-600">{tx.status}</td>
+                      <td className={`px-6 py-5 text-right font-bold text-base ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
+                        {isIncoming ? '+' : '-'}{tx.amount} {tx.currency}
+                      </td>
                     </tr>
                   );
                 })}
