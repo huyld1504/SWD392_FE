@@ -31,7 +31,7 @@ export interface Topic {
 }
 
 // ==================== ARTICLE ====================
-export type ArticleStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type ArticleStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface Article {
   articleId: number;
@@ -66,6 +66,7 @@ export interface Diagram {
   diagramId: number;
   imageUrl: string;
   caption?: string;
+  sortOrder?: number;
 }
 
 // ==================== COMMENT ====================
