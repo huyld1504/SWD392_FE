@@ -125,7 +125,7 @@ export default function ArticleDetailPage() {
                   )}
                 </div>
                 <Text className="text-sm text-slate-500 block mt-1">
-                  Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} • 12 phút đọc
+                  Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} 
                 </Text>
               </div>
             </div>

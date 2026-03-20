@@ -157,8 +157,7 @@ export default function LectureWalletPage() {
               </thead>
               <tbody className="divide-y divide-teal-500/5">
                 {transactions.map((tx: any) => {
-                  const INCOMING_TYPES = ['RECEIVE_DONATE', 'CREDIT', 'FEEDING'];
-                  const isIncoming = INCOMING_TYPES.includes(tx.transactionType);
+                  const isIncoming = tx.direction === 'IN';
 
                   const TX_LABELS: Record<string, string> = {
                     RECEIVE_DONATE: 'Nhận ủng hộ',
@@ -179,6 +178,10 @@ export default function LectureWalletPage() {
                   const icon = TX_ICONS[tx.transactionType] ?? 'swap_horiz';
                   const iconColors = isIncoming ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
 
+                  const counterparty = isIncoming ? tx.sender : tx.receiver;
+                  const counterpartyName = counterparty?.name || (tx.transactionType === 'FEEDING' ? 'Hệ thống' : '—');
+                  const counterpartyEmail = counterparty?.email;
+
                   return (
                     <tr key={tx.transactionId} className="hover:bg-teal-500/5 transition-colors">
                       <td className="px-6 py-5">
@@ -198,11 +201,11 @@ export default function LectureWalletPage() {
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        {tx.counterpartyName ? (
+                        {counterpartyName !== '—' ? (
                           <div>
-                            <div className="text-sm font-medium text-slate-800">{tx.counterpartyName}</div>
-                            {tx.counterpartyEmail && (
-                              <div className="text-xs text-slate-400">{tx.counterpartyEmail}</div>
+                            <div className="text-sm font-medium text-slate-800">{counterpartyName}</div>
+                            {counterpartyEmail && (
+                              <div className="text-xs text-slate-400">{counterpartyEmail}</div>
                             )}
                           </div>
                         ) : (
@@ -210,7 +213,7 @@ export default function LectureWalletPage() {
                         )}
                       </td>
                       <td className={`px-6 py-5 text-right font-bold text-base ${isIncoming ? 'text-green-500' : 'text-red-500'}`}>
-                        {isIncoming ? '+' : '-'}{tx.amount} {tx.currency}
+                        {isIncoming ? '+' : '-'}{Math.abs(tx.amount)} {tx.currency}
                       </td>
                     </tr>
                   );

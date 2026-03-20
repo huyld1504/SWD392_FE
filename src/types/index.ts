@@ -102,10 +102,21 @@ export type TransactionType =
 export interface Transaction {
   transactionId: number;
   transactionType: TransactionType;
+  direction: 'IN' | 'OUT';
   amount: number;
   currency: string;
-  counterpartyName?: string;
-  counterpartyEmail?: string | null;
+  sender?: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+  };
+  receiver?: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+  };
   createdAt: string;
 }
 

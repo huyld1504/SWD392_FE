@@ -70,4 +70,39 @@ export const walletApi = {
     );
     return res.data.data;
   },
+
+  /**
+   * Top-up the System Wallet with a specific amount.
+   * Role: ADMIN only.
+   */
+  topUpSystemWallet: async (amount: number): Promise<string> => {
+    const res = await axiosInstance.put<ApiResponse<string>>(
+      '/api/v1/wallets/system/topup',
+      { amount }
+    );
+    return res.data.message;
+  },
+
+  /**
+   * Get transactions of the System Wallet.
+   * Role: ADMIN only.
+   */
+  getSystemTransactions: async (
+    params: WalletTransactionParams = {},
+  ): Promise<PaginationResponse<Transaction>> => {
+    const { page = 1, size = 10, fromDate, toDate, ...rest } = params;
+    const res = await axiosInstance.get<ApiResponse<PaginationResponse<Transaction>>>(
+      '/api/v1/wallets/system/transactions',
+      {
+        params: {
+          ...rest,
+          page: page - 1,
+          size,
+          ...(fromDate && { fromDate: `${fromDate}T00:00:00` }),
+          ...(toDate && { toDate: `${toDate}T23:59:59` }),
+        }
+      },
+    );
+    return res.data.data;
+  },
 };

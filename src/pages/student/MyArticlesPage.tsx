@@ -70,6 +70,7 @@ export default function StudentMyArticlesPage() {
     },
     { key: 'APPROVED', label: 'Đã duyệt' },
     { key: 'REJECTED', label: 'Từ chối' },
+    { key: 'DRAFT', label: 'Nháp' },
   ];
 
   const columns: ColumnsType<Article> = [
