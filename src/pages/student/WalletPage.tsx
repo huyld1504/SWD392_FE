@@ -124,12 +124,12 @@ export default function WalletPage() {
                   <th className="px-6 py-4">Thời gian</th>
                   <th className="px-6 py-4">Loại giao dịch</th>
                   <th className="px-6 py-4 text-right">Số tiền</th>
-                  <th className="px-6 py-4 text-right">Mô tả</th>
+                  <th className="px-6 py-4 text-right">Đối tác giao dịch</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-teal-500/5">
                 {transactions.map((tx) => {
-                  const isPositive = tx.amount > 0;
+                  const isPositive = tx.direction === 'IN';
                   const absAmount = Math.abs(tx.amount);
 
                   let icon = 'swap_horiz';
@@ -151,6 +151,10 @@ export default function WalletPage() {
                     DEBIT: 'Trừ tiền',
                   };
 
+                  const counterparty = isPositive ? tx.sender : tx.receiver;
+                  const counterpartyName = counterparty?.name || (tx.transactionType === 'FEEDING' ? 'Hệ thống' : '—');
+                  const counterpartyEmail = counterparty?.email;
+
                   return (
                     <tr key={tx.transactionId} className="hover:bg-teal-500/5 transition-colors group">
                       <td className="px-6 py-5">
@@ -171,7 +175,7 @@ export default function WalletPage() {
                               {typeLabel[tx.transactionType] ?? tx.transactionType}
                             </div>
                             <div className="text-xs text-slate-500 truncate max-w-[200px]">
-                              {tx.counterpartyName ?? 'Hệ thống'}
+                              ID: {tx.transactionId}
                             </div>
                           </div>
                         </div>
@@ -180,7 +184,8 @@ export default function WalletPage() {
                         {isPositive ? '+' : '-'}{absAmount} {tx.currency}
                       </td>
                       <td className="px-6 py-5 text-right text-xs text-slate-400">
-                        {tx.counterpartyEmail ?? '—'}
+                        <div className="font-medium text-slate-700 dark:text-slate-300">{counterpartyName}</div>
+                        {counterpartyEmail && <div>{counterpartyEmail}</div>}
                       </td>
                     </tr>
                   );

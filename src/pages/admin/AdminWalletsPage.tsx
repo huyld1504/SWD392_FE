@@ -1,18 +1,32 @@
 import { useState } from 'react';
 import {
-  Table, Button, Space, Select, Typography, Tag, Card, Row, Col, Popconfirm, Statistic,
+  Table, Button, Space, Select, Typography, Tag, Card, Row, Col, Popconfirm, Statistic, Tooltip,
 } from 'antd';
-import { LockOutlined, UnlockOutlined, WalletOutlined } from '@ant-design/icons';
+import { 
+  LockOutlined, 
+  UnlockOutlined, 
+  WalletOutlined, 
+  CopyOutlined, 
+  HistoryOutlined, 
+  GlobalOutlined,
+  PlusCircleOutlined
+} from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAllWallets, useUpdateWalletStatus } from '@/hooks/useWallets';
 import type { Wallet, WalletStatus, WalletType } from '@/types';
-import { CopyOutlined } from '@ant-design/icons';
+import SystemWalletModal from '@/components/admin/SystemWalletModal';
+import UserWalletTransactionsModal from '@/components/admin/UserWalletTransactionsModal';
+
 const { Title, Text } = Typography;
 
 export default function AdminWalletsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<WalletStatus | undefined>();
   const [typeFilter, setTypeFilter] = useState<WalletType | undefined>();
+
+  const [systemModalVisible, setSystemModalVisible] = useState(false);
+  const [userTxModalVisible, setUserTxModalVisible] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState<number | null>(null);
 
   const { data, isLoading } = useAllWallets({
     page: page - 1,
@@ -110,45 +124,59 @@ export default function AdminWalletsPage() {
     {
       title: 'Hành động',
       key: 'actions',
-      width: 130,
-      render: (_: unknown, record: Wallet) =>
-        record.status === 'ACTIVE' ? (
-          <Popconfirm
-            title="Khóa ví này?"
-            description="Người dùng sẽ không thể thực hiện giao dịch."
-            onConfirm={() => updateStatus({ walletId: record.walletId, status: 'LOCKED' })}
-            okText="Khóa"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
-            <Button
-              type="text"
-              icon={<LockOutlined />}
-              danger
-              size="small"
-              style={{ fontWeight: 600 }}
+      width: 160,
+      render: (_: unknown, record: Wallet) => (
+        <Space>
+           <Tooltip title="Xem lịch sử giao dịch">
+             <Button 
+                type="text" 
+                icon={<HistoryOutlined />} 
+                onClick={() => {
+                   setSelectedWalletId(record.walletId);
+                   setUserTxModalVisible(true);
+                }}
+             />
+           </Tooltip>
+           
+           {record.status === 'ACTIVE' ? (
+            <Popconfirm
+                title="Khóa ví này?"
+                description="Người dùng sẽ không thể thực hiện giao dịch."
+                onConfirm={() => updateStatus({ walletId: record.walletId, status: 'LOCKED' })}
+                okText="Khóa"
+                cancelText="Hủy"
+                okButtonProps={{ danger: true }}
             >
-              Khóa ví
-            </Button>
-          </Popconfirm>
-        ) : (
-          <Popconfirm
-            title="Mở khóa ví này?"
-            onConfirm={() => updateStatus({ walletId: record.walletId, status: 'ACTIVE' })}
-            okText="Mở khóa"
-            cancelText="Hủy"
-            okButtonProps={{ style: { background: '#0d9488', borderColor: '#0d9488' } }}
-          >
-            <Button
-              type="text"
-              icon={<UnlockOutlined />}
-              size="small"
-              style={{ color: '#0d9488', fontWeight: 600 }}
+                <Button
+                type="text"
+                icon={<LockOutlined />}
+                danger
+                size="small"
+                style={{ fontWeight: 600 }}
+                >
+                Khóa
+                </Button>
+            </Popconfirm>
+            ) : (
+            <Popconfirm
+                title="Mở khóa ví này?"
+                onConfirm={() => updateStatus({ walletId: record.walletId, status: 'ACTIVE' })}
+                okText="Mở khóa"
+                cancelText="Hủy"
+                okButtonProps={{ style: { background: '#0d9488', borderColor: '#0d9488' } }}
             >
-              Mở khóa
-            </Button>
-          </Popconfirm>
-        ),
+                <Button
+                type="text"
+                icon={<UnlockOutlined />}
+                size="small"
+                style={{ color: '#0d9488', fontWeight: 600 }}
+                >
+                Mở
+                </Button>
+            </Popconfirm>
+            )}
+        </Space>
+      ),
     },
   ];
 
@@ -163,7 +191,34 @@ export default function AdminWalletsPage() {
           <Title level={3} style={{ margin: 0, fontWeight: 800 }}>Quản lý Ví</Title>
           <Text style={{ color: '#64748b' }}>Xem và quản lý trạng thái ví của tất cả người dùng</Text>
         </div>
+        
+        <Button 
+          type="primary" 
+          icon={<GlobalOutlined />} 
+          style={{ 
+            background: 'linear-gradient(135deg, #0d9488 0%, #0f766e 100%)',
+            border: 'none',
+            height: 40,
+            borderRadius: 8,
+            boxShadow: '0 4px 6px -1px rgba(13, 148, 136, 0.2)'
+          }}
+          onClick={() => setSystemModalVisible(true)}
+        >
+          Quản lý Ví Hệ thống
+        </Button>
       </div>
+
+      <SystemWalletModal 
+        visible={systemModalVisible} 
+        onClose={() => setSystemModalVisible(false)} 
+      />
+      
+      <UserWalletTransactionsModal
+        visible={userTxModalVisible}
+        onClose={() => setUserTxModalVisible(false)}
+        walletId={selectedWalletId}
+      />
+
 
       {/* Stats */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>

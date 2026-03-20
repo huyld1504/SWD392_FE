@@ -18,7 +18,7 @@ export default function AdminArticlesPage() {
   const { data, isLoading } = useArticles({
     page: page,
     pageSize: 10,
-    // status: statusFilter || undefined,
+    status: (statusFilter as ArticleStatus) || undefined,
   });
 
   const { mutate: approveArticle, isPending: isApproving } = useApproveArticle();
@@ -107,7 +107,7 @@ export default function AdminArticlesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {data?.data?.map((article: any, idx) => (
+              {data?.data?.map((article, idx) => (
                 <tr
                   key={article.articleId}
                   className="hover:bg-gray-50 transition-colors"
@@ -119,10 +119,10 @@ export default function AdminArticlesPage() {
                     <span className="line-clamp-1">{article.title}</span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {article.author?.fullName}
+                    {article.author?.name}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {article.topic?.name}
+                    {article.topicName}
                   </td>
                   <td className="px-6 py-4">
                     <ArticleStatusBadge status={article.status} />

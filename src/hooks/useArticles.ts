@@ -33,7 +33,7 @@ export const useArticle = (id: number) =>
     enabled: !!id,
   });
 
-/** GET my articles (lecture view) */
+/** GET my articles (lecture / student view) */
 export const useMyArticles = (params: ArticleParams) =>
   useQuery({
     queryKey: articleKeys.myList(params),
@@ -43,7 +43,7 @@ export const useMyArticles = (params: ArticleParams) =>
 
 // ==================== MUTATIONS ====================
 
-/** CREATE article */
+/** CREATE article (PENDING) */
 export const useCreateArticle = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -51,6 +51,24 @@ export const useCreateArticle = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: articleKeys.myArticles() });
       toast.success('Tạo bài viết thành công! Đang chờ duyệt...');
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Có lỗi xảy ra!';
+      toast.error(message);
+    },
+  });
+};
+
+/** SAVE DRAFT (DRAFT) */
+export const useSaveDraft = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateArticleRequest) => articleApi.saveDraft(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: articleKeys.myArticles() });
+      toast.success('Đã lưu bản nháp!');
     },
     onError: (err: unknown) => {
       const message =
@@ -81,6 +99,25 @@ export const useUpdateArticle = () => {
   });
 };
 
+/** SUBMIT draft for review (DRAFT → PENDING) */
+export const useSubmitArticle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => articleApi.submitArticle(id),
+    onSuccess: (updated: Article) => {
+      queryClient.setQueryData(articleKeys.detail(updated.articleId), updated);
+      queryClient.invalidateQueries({ queryKey: articleKeys.myArticles() });
+      toast.success('Đã gửi bài viết để duyệt!');
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Có lỗi xảy ra!';
+      toast.error(message);
+    },
+  });
+};
+
 /** DELETE article */
 export const useDeleteArticle = () => {
   const queryClient = useQueryClient();
@@ -95,7 +132,7 @@ export const useDeleteArticle = () => {
   });
 };
 
-/** APPROVE article (admin) */
+/** APPROVE article (admin/lecture) */
 export const useApproveArticle = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -108,11 +145,11 @@ export const useApproveArticle = () => {
   });
 };
 
-/** REJECT article (admin) */
+/** REJECT article (admin/lecture) */
 export const useRejectArticle = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+    mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       articleApi.reject(id, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: articleKeys.lists() });
@@ -120,5 +157,3 @@ export const useRejectArticle = () => {
     },
   });
 };
-
-

@@ -10,12 +10,16 @@ import { vi } from 'date-fns/locale';
 import { Button, Avatar, Tag, Divider, Typography, Space, Input, List } from 'antd';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ArticleStatusBadge from '@/components/common/ArticleStatusBadge';
+import ArticleContentRenderer from '@/components/common/ArticleContentRenderer';
+import { useAuthStore } from '@/stores/authStore';
 
 const { Title, Text, Paragraph } = Typography;
+
 
 export default function ArticleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const articleId = Number(id);
 
   const { data: article, isLoading } = useArticle(articleId);
@@ -121,7 +125,7 @@ export default function ArticleDetailPage() {
                   )}
                 </div>
                 <Text className="text-sm text-slate-500 block mt-1">
-                  Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} • 12 phút đọc
+                  Đăng ngày {formatDistanceToNow(new Date(article.createdAt), { addSuffix: true, locale: vi })} 
                 </Text>
               </div>
             </div>
@@ -157,7 +161,9 @@ export default function ArticleDetailPage() {
             {article.diagrams && article.diagrams.length > 0 && (
               <img alt="Thumbnail" className="w-full rounded-2xl shadow-sm mb-10 object-cover" src={article.diagrams[0].imageUrl} />
             )}
-            <div dangerouslySetInnerHTML={{ __html: article.contentBody }} className="break-words" />
+            
+            <ArticleContentRenderer html={article.contentBody} className="break-words" />
+
             {article.diagrams && article.diagrams.length > 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-10">
                 {article.diagrams.slice(1).map(diagram => (
@@ -252,6 +258,7 @@ export default function ArticleDetailPage() {
         {/* Sidebar: Donate & Stats */}
         <aside className="w-full lg:w-[320px] shrink-0 space-y-6">
           {/* Donate Card */}
+          {user?.userId !== article.author?.userId && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sticky top-24 shadow-sm">
             <Title level={4} className="!text-lg !font-bold !mb-4 flex items-center gap-2 !mt-0">
               <span className="text-teal-600 material-symbols-outlined">favorite</span>
@@ -330,6 +337,7 @@ export default function ArticleDetailPage() {
               )}
             </div>
           </div>
+          )}
         </aside>
       </div>
     </div>

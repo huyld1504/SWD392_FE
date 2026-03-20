@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
-  Table, Button, Tag, Input, Modal, Typography, Space, Row, Col, Card, Tabs, Empty,
+  Table, Button, Tag, Input, Modal, Typography, Space, Card, Tabs, Empty,
 } from 'antd';
 import {
   PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined,
-  FileTextOutlined, HeartOutlined, MessageOutlined, StarFilled,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import type { ArticleStatus, Article } from '@/types';
 import type { ColumnsType } from 'antd/es/table';
@@ -19,6 +19,7 @@ const STATUS_CONFIG: Record<ArticleStatus, { color: string; bg: string; dot: str
   APPROVED: { color: '#047857', bg: '#d1fae5', dot: '#10b981', label: 'Đã duyệt' },
   PENDING: { color: '#b45309', bg: '#fef3c7', dot: '#f59e0b', label: 'Chờ duyệt' },
   REJECTED: { color: '#b91c1c', bg: '#fee2e2', dot: '#ef4444', label: 'Từ chối' },
+  DRAFT: { color: '#64748b', bg: '#f1f5f9', dot: '#94a3b8', label: 'Nháp' },
 };
 
 function StatusBadge({ status }: { status: ArticleStatus }) {
@@ -77,7 +78,7 @@ export default function MyArticlesPage() {
           </Text>
           {record.status === 'REJECTED' && (
             <div style={{ marginTop: 4, fontSize: 11, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span>â—</span> Nội dung chưa đạt tiêu chuẩn học thuật
+              <span>●</span> Nội dung chưa đạt tiêu chuẩn học thuật
             </div>
           )}
         </div>

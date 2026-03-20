@@ -1,14 +1,27 @@
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useArticle, useUpdateArticle } from '@/hooks/useArticles';
 import { useTopics } from '@/hooks/useTopics';
-import { ArrowLeft, Save, X, ImagePlus } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
+import {
+  Form, Input, Select, Button, Card, Typography, Upload, Space, Tabs, Badge,
+  Image, Spin, Result, Tooltip, Tag,
+} from 'antd';
+import {
+  ArrowLeftOutlined, SaveOutlined, FileTextOutlined, PictureOutlined,
+  InboxOutlined, DeleteOutlined, PlusOutlined, CodeOutlined,
+} from '@ant-design/icons';
+import type { UploadFile, RcFile } from 'antd/es/upload';
+import type { Diagram } from '@/types';
+import TabbedCodeBlockEditor, { type CodeBlock, serializeCodeBlock, parseCodeBlocksFromHtml } from '@/components/common/TabbedCodeBlockEditor';
+
+const { Title, Text } = Typography;
+const { Dragger } = Upload;
+
 
 const articleSchema = z.object({
   title: z
@@ -27,20 +40,36 @@ export default function EditArticlePage() {
   const articleId = Number(id);
 
   const { data: article, isLoading } = useArticle(articleId);
-  const { data: topics, isLoading: topicsLoading } = useTopics();
+  const { data: topicsPage, isLoading: topicsLoading } = useTopics();
+  const topics = topicsPage?.data ?? [];
   const { mutate: updateArticle, isPending } = useUpdateArticle();
 
-  // Image state
-  const [newImages, setNewImages] = useState<File[]>([]);
-  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState('content');
+
+  // Diagram management
+  const [existingDiagrams, setExistingDiagrams] = useState<Diagram[]>([]);
+  const [deleteDiagramIds, setDeleteDiagramIds] = useState<number[]>([]);
+  const [newFileList, setNewFileList] = useState<UploadFile[]>([]);
+  const [codeBlocks, setCodeBlocks] = useState<CodeBlock[]>([]);
+
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link', 'image', 'blockquote'],
+        ['clean'],
+      ],
+    }),
+    [],
+  );
 
   const {
-    register,
     handleSubmit,
-    reset,
     control,
-    formState: { errors, isDirty },
+    reset,
+    formState: { errors },
   } = useForm<ArticleForm>({
     resolver: zodResolver(articleSchema),
   });
@@ -48,259 +77,388 @@ export default function EditArticlePage() {
   // Populate form when article loads
   useEffect(() => {
     if (article) {
+      // Separate code blocks from HTML body
+      const blocks = parseCodeBlocksFromHtml(article.contentBody || '');
+      setCodeBlocks(blocks);
+
+      // Clean body for Quill
+      const cleanHtml = (article.contentBody || '').replace(
+        /<div class="tabbed-code-block"[^>]*><\/div>/g,
+        ''
+      );
+
       reset({
         title: article.title,
-        contentBody: article.contentBody,
+        contentBody: cleanHtml,
         topicId: article.topicId,
       });
+      setExistingDiagrams(article.diagrams ?? []);
+      setDeleteDiagramIds([]);
+      setNewFileList([]);
     }
   }, [article, reset]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (!files.length) return;
-    setNewImages(files);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setNewImagePreviews(previews);
-  };
-
-  const removeNewImage = (idx: number) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== idx));
-    setNewImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+  const handleDeleteExisting = (diagramId: number) => {
+    setExistingDiagrams((prev) => prev.filter((d) => d.diagramId !== diagramId));
+    setDeleteDiagramIds((prev) => [...prev, diagramId]);
   };
 
   const onSubmit = (data: ArticleForm) => {
+    const newFiles = newFileList
+      .map((f) => f.originFileObj)
+      .filter((f): f is RcFile => !!f);
+
+    const serializedBlocks = codeBlocks.map(serializeCodeBlock).join('');
+    const fullContentBody = data.contentBody + (serializedBlocks || '');
+
     updateArticle(
       {
         id: articleId,
         data: {
-          ...data,
-          ...(newImages.length > 0 ? { diagrams: newImages } : {}),
+          title: data.title,
+          contentBody: fullContentBody,
+          existingDiagrams: existingDiagrams.map((d, i) => ({
+            diagramId: d.diagramId,
+            caption: d.caption,
+            sortOrder: d.sortOrder ?? i + 1,
+          })),
+          deleteDiagramIds: deleteDiagramIds.length > 0 ? deleteDiagramIds : undefined,
+          newDiagrams: newFiles.length > 0 ? newFiles : undefined,
         },
       },
-      { onSuccess: () => navigate('/lecture/articles') },
+      { onSuccess: () => navigate('/lecture/my-articles') },
     );
   };
 
-  if (isLoading) return <LoadingSpinner fullScreen text="Đang tải bài viết..." />;
+  // ── Loading ───────────────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 320 }}>
+        <Spin size="large" tip="Đang tải bài viết..." />
+      </div>
+    );
+  }
 
   if (!article) {
     return (
-      <div className="text-center py-16">
-        <p className="text-gray-500 text-lg">Không tìm thấy bài viết</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 text-teal-600 hover:text-teal-700 font-medium"
-        >
-          ← Quay lại
-        </button>
-      </div>
+      <Result
+        status="404"
+        title="Không tìm thấy bài viết"
+        extra={
+          <Button type="primary" onClick={() => navigate('/lecture/my-articles')}
+            style={{ background: '#0d9488', borderColor: '#0d9488' }}>
+            Quay lại danh sách
+          </Button>
+        }
+      />
     );
   }
 
-  if (article.status !== 'PENDING') {
+  const canEdit = article.status === 'PENDING' || article.status === 'REJECTED' || article.status === 'DRAFT';
+  if (!canEdit) {
     return (
-      <div className="text-center py-16">
-        <p className="text-gray-500 text-lg">
-          Chỉ có thể chỉnh sửa bài viết đang chờ duyệt
-        </p>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 text-teal-600 hover:text-teal-700 font-medium"
-        >
-          ← Quay lại
-        </button>
-      </div>
+      <Result
+        status="warning"
+        title="Không thể chỉnh sửa"
+        subTitle="Chỉ có thể chỉnh sửa bài viết ở trạng thái Nháp, Chờ duyệt hoặc Bị từ chối."
+        extra={
+          <Button type="primary" onClick={() => navigate('/lecture/my-articles')}
+            style={{ background: '#0d9488', borderColor: '#0d9488' }}>
+            Quay lại danh sách
+          </Button>
+        }
+      />
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-700 mb-6 transition-colors"
-      >
-        <ArrowLeft size={18} />
-        <span className="text-sm">Quay lại</span>
-      </button>
+  const contentHasError = !!(errors.title || errors.contentBody || errors.topicId);
+  const diagramChanges = deleteDiagramIds.length + newFileList.length;
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Chỉnh sửa bài viết</h1>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+  const tabItems = [
+    {
+      key: 'content',
+      label: (
+        <span>
+          <FileTextOutlined style={{ marginRight: 6 }} />
+          Nội dung
+          {contentHasError && (
+            <Badge dot status="error" style={{ marginLeft: 6, verticalAlign: 'middle' }} />
+          )}
+        </span>
+      ),
+      children: (
+        <div style={{ paddingTop: 8 }}>
           {/* Topic */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Chủ đề <span className="text-red-500">*</span>
-            </label>
-            {topicsLoading ? (
-              <LoadingSpinner text="" />
-            ) : (
-              <select
-                {...register('topicId', { valueAsNumber: true })}
-                className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${
-                  errors.topicId ? 'border-red-300' : 'border-gray-300'
-                }`}
-              >
-                <option value={0}>-- Chọn chủ đề --</option>
-                {topics?.data.map((topic) => (
-                  <option key={topic.topicId} value={topic.topicId}>
-                    {topic.name}
-                    {topic.subjectName ? ` (${topic.subjectName})` : ''}
-                  </option>
-                ))}
-              </select>
-            )}
-            {errors.topicId && (
-              <p className="mt-1 text-sm text-red-600">{errors.topicId.message}</p>
-            )}
-          </div>
+          <Form.Item
+            label={<span style={{ fontWeight: 600 }}>Chủ đề <span style={{ color: '#ef4444' }}>*</span></span>}
+            validateStatus={errors.topicId ? 'error' : ''}
+            help={errors.topicId?.message}
+          >
+            <Controller
+              name="topicId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  size="large"
+                  placeholder="-- Chọn chủ đề --"
+                  loading={topicsLoading}
+                  style={{ width: '100%' }}
+                  onChange={(val) => field.onChange(Number(val))}
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {topics.map((t) => (
+                    <Select.Option key={t.topicId} value={t.topicId}>
+                      {t.name}{t.subjectName ? ` — ${t.subjectName}` : ''}
+                    </Select.Option>
+                  ))}
+                </Select>
+              )}
+            />
+          </Form.Item>
 
           {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tiêu đề <span className="text-red-500">*</span>
-            </label>
-            <input
-              {...register('title')}
-              placeholder="Nhập tiêu đề bài viết..."
-              className={`w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition-all ${
-                errors.title ? 'border-red-300' : 'border-gray-300'
-              }`}
+          <Form.Item
+            label={<span style={{ fontWeight: 600 }}>Tiêu đề <span style={{ color: '#ef4444' }}>*</span></span>}
+            validateStatus={errors.title ? 'error' : ''}
+            help={errors.title?.message}
+          >
+            <Controller
+              name="title"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  size="large"
+                  placeholder="Nhập tiêu đề bài viết..."
+                  maxLength={255}
+                  showCount
+                />
+              )}
             />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-            )}
-          </div>
+          </Form.Item>
 
           {/* Content */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nội dung <span className="text-red-500">*</span>
-            </label>
-            <div className={`${errors.contentBody ? 'border-red-300' : ''}`}>
-              <Controller
-                name="contentBody"
-                control={control}
-                render={({ field }) => (
+          <Form.Item
+            label={<span style={{ fontWeight: 600 }}>Nội dung <span style={{ color: '#ef4444' }}>*</span></span>}
+            validateStatus={errors.contentBody ? 'error' : ''}
+            help={errors.contentBody?.message}
+          >
+            <Controller
+              name="contentBody"
+              control={control}
+              render={({ field }) => (
+                <div
+                  style={{
+                    border: errors.contentBody ? '1px solid #ff4d4f' : '1px solid #d9d9d9',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <style>{`.ql-editor { min-height: 300px; font-size: 15px; }`}</style>
                   <ReactQuill
                     theme="snow"
+                    modules={modules}
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Viết nội dung bài viết tại đây..."
-                    className="bg-white h-[300px] mb-12"
-                    modules={{
-                      toolbar: [
-                        [{ header: [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-                        ['link'],
-                        ['clean']
-                      ],
-                    }}
                   />
-                )}
-              />
-            </div>
-            {errors.contentBody && (
-              <p className="mt-1 text-sm text-red-600">{errors.contentBody.message}</p>
-            )}
-          </div>
-
-          {/* Images */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hình ảnh minh họa
-            </label>
-
-            {/* Existing images from article */}
-            {article.diagrams && article.diagrams.length > 0 && newImages.length === 0 && (
-              <div className="mb-3">
-                <p className="text-xs text-gray-400 mb-2">Ảnh hiện tại:</p>
-                <div className="flex flex-wrap gap-3">
-                  {article.diagrams.map((diagram) => (
-                    <div key={diagram.diagramId} className="relative group">
-                      <img
-                        src={diagram.imageUrl}
-                        alt={diagram.caption || 'Diagram'}
-                        className="w-28 h-20 object-cover rounded-lg border border-gray-200"
-                      />
-                      {diagram.caption && (
-                        <p className="text-[10px] text-gray-400 mt-1 text-center truncate max-w-[112px]">
-                          {diagram.caption}
-                        </p>
-                      )}
-                    </div>
-                  ))}
                 </div>
-                <p className="text-xs text-amber-600 mt-2">
-                  Tải lên ảnh mới sẽ thay thế các ảnh hiện tại.
-                </p>
-              </div>
-            )}
-
-            {/* New image previews */}
-            {newImagePreviews.length > 0 && (
-              <div className="flex flex-wrap gap-3 mb-3">
-                {newImagePreviews.map((src, idx) => (
-                  <div key={idx} className="relative group">
-                    <img
-                      src={src}
-                      alt={`preview-${idx}`}
-                      className="w-28 h-20 object-cover rounded-lg border border-teal-300"
+              )}
+            />
+          </Form.Item>
+        </div>
+      ),
+    },
+    {
+      key: 'diagrams',
+      label: (
+        <span>
+          <PictureOutlined style={{ marginRight: 6 }} />
+          Sơ đồ / Hình ảnh
+          {diagramChanges > 0 && (
+            <Badge count={diagramChanges} size="small" style={{ marginLeft: 6, backgroundColor: '#f59e0b' }} />
+          )}
+        </span>
+      ),
+      children: (
+        <div style={{ paddingTop: 8 }}>
+          {/* Existing diagrams */}
+          {existingDiagrams.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <Text style={{ fontWeight: 600, color: '#374151', display: 'block', marginBottom: 12 }}>
+                Sơ đồ hiện tại
+              </Text>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                {existingDiagrams.map((diagram) => (
+                  <div
+                    key={diagram.diagramId}
+                    style={{
+                      position: 'relative',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      width: 120,
+                    }}
+                  >
+                    <Image
+                      src={diagram.imageUrl}
+                      alt={diagram.caption || `Diagram ${diagram.diagramId}`}
+                      width={120}
+                      height={90}
+                      style={{ objectFit: 'cover', display: 'block' }}
+                      preview={{ mask: 'Xem' }}
                     />
-                    <button
-                      type="button"
-                      onClick={() => removeNewImage(idx)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-none cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
+                    {diagram.caption && (
+                      <div style={{
+                        padding: '4px 6px', fontSize: 11, color: '#64748b',
+                        background: '#f8fafc', borderTop: '1px solid #e2e8f0',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {diagram.caption}
+                      </div>
+                    )}
+                    <Tooltip title="Xoá sơ đồ này">
+                      <Button
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        style={{
+                          position: 'absolute', top: 4, right: 4,
+                          opacity: 0.9, borderRadius: 4,
+                        }}
+                        onClick={() => handleDeleteExisting(diagram.diagramId)}
+                      />
+                    </Tooltip>
                   </div>
                 ))}
               </div>
-            )}
+              {deleteDiagramIds.length > 0 && (
+                <Text style={{ color: '#f59e0b', fontSize: 12, display: 'block', marginTop: 8 }}>
+                  ⚠ {deleteDiagramIds.length} sơ đồ sẽ bị xoá khi lưu.
+                </Text>
+              )}
+            </div>
+          )}
 
-            {/* Upload button */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
+          {/* Upload new diagrams */}
+          <div>
+            <Text style={{ fontWeight: 600, color: '#374151', display: 'block', marginBottom: 12 }}>
+              <PlusOutlined style={{ marginRight: 4 }} />
+              Thêm sơ đồ mới
+            </Text>
+            <Dragger
+              listType="picture"
+              fileList={newFileList}
+              onChange={({ fileList: fl }) => setNewFileList(fl)}
+              beforeUpload={() => false}
+              accept=".png,.jpg,.jpeg,.svg,.gif,.webp"
               multiple
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-colors cursor-pointer"
+              style={{ borderRadius: 8, background: '#fafafa' }}
             >
-              <ImagePlus size={16} />
-              {newImages.length > 0 ? `Đã chọn ${newImages.length} ảnh — Đổi ảnh` : 'Thêm / đổi ảnh'}
-            </button>
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined style={{ color: '#0d9488', fontSize: 36 }} />
+              </p>
+              <p style={{ color: '#334155', margin: '8px 0 4px', fontWeight: 500 }}>
+                Kéo thả file vào đây hoặc <span style={{ color: '#0d9488', fontWeight: 700 }}>Click để chọn</span>
+              </p>
+              <p style={{ fontSize: 12, color: '#94a3b8' }}>PNG, JPG, SVG, GIF, WebP (tối đa 10MB mỗi file)</p>
+            </Dragger>
           </div>
+
+          {article.status === 'REJECTED' && (
+            <div style={{ marginTop: 16, padding: '10px 14px', background: '#fff7ed', borderRadius: 8, border: '1px solid #fed7aa' }}>
+              <Text style={{ color: '#c2410c', fontSize: 13 }}>
+                ℹ Bài viết bị từ chối. Sau khi lưu, bài viết sẽ tự động chuyển về trạng thái <Tag color="orange">Chờ duyệt</Tag>.
+              </Text>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'code',
+      label: (
+        <span>
+          <CodeOutlined style={{ marginRight: 6 }} />
+          Code Blocks
+          {codeBlocks.length > 0 && (
+            <Badge count={codeBlocks.length} size="small" style={{ marginLeft: 6, backgroundColor: '#0d9488' }} />
+          )}
+        </span>
+      ),
+      children: (
+        <div style={{ paddingTop: 8 }}>
+          <TabbedCodeBlockEditor blocks={codeBlocks} onChange={setCodeBlocks} />
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ maxWidth: 860, margin: '0 auto' }}>
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: 8, fontSize: 13, color: '#94a3b8' }}>
+        <span style={{ cursor: 'pointer' }} onClick={() => navigate('/lecture/my-articles')}>
+          Bài viết của tôi
+        </span>
+        <span style={{ margin: '0 6px' }}>/</span>
+        <span style={{ color: '#0f172a', fontWeight: 600 }}>Chỉnh sửa bài viết</span>
+      </div>
+
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        style={{ marginBottom: 24, color: '#64748b', paddingLeft: 0 }}
+        onClick={() => navigate(-1)}
+      >
+        Quay lại
+      </Button>
+
+      <Card style={{ borderRadius: 16, border: '1px solid #e2e8f0' }} styles={{ body: { padding: '36px 40px' } }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+          <Title level={3} style={{ margin: 0, fontWeight: 800 }}>Chỉnh sửa bài viết</Title>
+          {article.status === 'REJECTED' && <Tag color="red">Bị từ chối</Tag>}
+          {article.status === 'PENDING' && <Tag color="orange">Chờ duyệt</Tag>}
+          {article.status === 'DRAFT' && <Tag color="default">Nháp</Tag>}
+        </div>
+        <Text style={{ color: '#64748b', display: 'block', marginBottom: 24 }}>
+          Cập nhật nội dung bài viết. Bài viết sẽ được đưa vào hàng chờ kiểm duyệt lại sau khi lưu.
+        </Text>
+
+        <Form layout="vertical" onFinish={handleSubmit(onSubmit)}>
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={tabItems}
+            style={{ marginBottom: 8 }}
+          />
 
           {/* Actions */}
-          <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-6 py-2.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={isPending || (!isDirty && newImages.length === 0)}
-              className="flex items-center gap-2 px-6 py-2.5 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
-            >
-              <Save size={16} />
-              {isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
-            </button>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            paddingTop: 16, borderTop: '1px solid #f1f5f9', marginTop: 8,
+          }}>
+            <Text style={{ fontSize: 12, color: '#94a3b8' }}>
+              * Bài viết sẽ được đưa lại vào hàng chờ kiểm duyệt sau khi lưu.
+            </Text>
+            <Space>
+              <Button size="large" onClick={() => navigate(-1)}>Hủy</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={isPending}
+                icon={<SaveOutlined />}
+                style={{ background: '#0d9488', borderColor: '#0d9488', fontWeight: 700 }}
+              >
+                Lưu thay đổi
+              </Button>
+            </Space>
           </div>
-        </form>
-      </div>
+        </Form>
+      </Card>
     </div>
   );
 }

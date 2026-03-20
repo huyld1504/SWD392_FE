@@ -31,7 +31,7 @@ export interface Topic {
 }
 
 // ==================== ARTICLE ====================
-export type ArticleStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type ArticleStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface Article {
   articleId: number;
@@ -66,6 +66,7 @@ export interface Diagram {
   diagramId: number;
   imageUrl: string;
   caption?: string;
+  sortOrder?: number;
 }
 
 // ==================== COMMENT ====================
@@ -101,10 +102,21 @@ export type TransactionType =
 export interface Transaction {
   transactionId: number;
   transactionType: TransactionType;
+  direction: 'IN' | 'OUT';
   amount: number;
   currency: string;
-  counterpartyName?: string;
-  counterpartyEmail?: string | null;
+  sender?: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+  };
+  receiver?: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl?: string | null;
+  };
   createdAt: string;
 }
 

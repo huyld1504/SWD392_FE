@@ -9,6 +9,7 @@ export const walletKeys = {
   myWallets: () => [...walletKeys.all, 'my'] as const,
   transactions: (walletId: number) => [...walletKeys.all, 'transactions', walletId] as const,
   admin: (params: WalletAdminParams) => [...walletKeys.all, 'admin', params] as const,
+  systemTransactions: (params: any) => [...walletKeys.all, 'system-transactions', params] as const,
 };
 
 /** GET all wallets of current user */
@@ -37,17 +38,40 @@ export const useAllWallets = (params: WalletAdminParams = {}) =>
 /** PATCH wallet status (admin) */
 export const useUpdateWalletStatus = () => {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ walletId, status }: { walletId: number; status: WalletStatus }) =>
-      walletApi.updateStatus(walletId, status),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: walletKeys.all });
-      toast.success('Cập nhật trạng thái ví thành công!');
-    },
-    onError: () => toast.error('Không thể cập nhật trạng thái ví!'),
-  });
-};
-export const useCreateEarnedWallet = () => {
+    return useMutation({
+      mutationFn: ({ walletId, status }: { walletId: number; status: WalletStatus }) =>
+        walletApi.updateStatus(walletId, status).then(() => {
+          qc.invalidateQueries({ queryKey: walletKeys.all });
+          toast.success('Cập nhật trạng thái ví thành công!');
+        }),
+      onError: () => toast.error('Không thể cập nhật trạng thái ví!'),
+    });
+  };
+
+  /** TOP UP System Wallet (admin) */
+  export const useTopUpSystemWallet = () => {
+    const qc = useQueryClient();
+    return useMutation({
+      mutationFn: (amount: number) => walletApi.topUpSystemWallet(amount),
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: walletKeys.all });
+        toast.success('Hệ thống đã được nạp tiền thành công!');
+      },
+      onError: (err: any) => {
+        toast.error(err?.response?.data?.message || 'Không thể nạp tiền vào ví hệ thống!');
+      },
+    });
+  };
+
+  /** GET System Wallet Transactions (admin) */
+  export const useSystemTransactions = (params: any = {}) =>
+    useQuery({
+      queryKey: walletKeys.systemTransactions(params),
+      queryFn: () => walletApi.getSystemTransactions(params),
+      placeholderData: (prev) => prev,
+    });
+
+  export const useCreateEarnedWallet = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: walletApi.createEarned,

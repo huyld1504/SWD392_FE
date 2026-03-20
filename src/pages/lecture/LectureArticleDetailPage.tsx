@@ -7,6 +7,7 @@ import { vi } from 'date-fns/locale';
 import { Button, Avatar, Typography, Space, Input, List, Modal } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import ArticleContentRenderer from '@/components/common/ArticleContentRenderer';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -152,7 +153,9 @@ export default function LectureArticleDetailPage() {
               {article.diagrams && article.diagrams.length > 0 && (
                 <img alt="Thumbnail" className="w-full rounded-2xl shadow-sm mb-10 object-cover" src={article.diagrams[0].imageUrl} />
               )}
-              <div dangerouslySetInnerHTML={{ __html: article.contentBody }} className="break-words" />
+              
+              <ArticleContentRenderer html={article.contentBody} className="break-words" />
+
               {article.diagrams && article.diagrams.length > 1 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-10">
                   {article.diagrams.slice(1).map((diagram) => (

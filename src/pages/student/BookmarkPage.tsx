@@ -198,11 +198,10 @@ export default function BookmarkPage() {
                 )}
 
                 <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-teal-50 relative">
-                  <img 
-                    src={article.diagrams?.[0]?.imageUrl || "https://res.cloudinary.com/huyld1504/image/upload/v1773331115/article_diagrams/e47gg8b4i80tqihbupe5.png"} 
-                    alt={article.title} 
-                    className="w-full h-full object-cover" 
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-emerald-500 opacity-70 group-hover:opacity-90 transition-opacity" />
+                  <div className="absolute inset-0 flex items-center justify-center text-white text-lg font-black">
+                    {article.title?.charAt(0)?.toUpperCase()}
+                  </div>
                 </div>
 
                 <div className="flex-1 min-w-0">
