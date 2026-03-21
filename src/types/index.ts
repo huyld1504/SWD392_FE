@@ -70,11 +70,28 @@ export interface Diagram {
 }
 
 // ==================== COMMENT ====================
+export interface CommentUserInfo {
+  userId: number;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+}
+
 export interface Comment {
   commentId: number;
+  user: CommentUserInfo;
   content: string;
-  author: User;
+  ratingStar: number | null;
+  isPinned: boolean;
   createdAt: string;
+  replies: Comment[] | null;
+}
+
+export interface CommentParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: 'asc' | 'desc';
 }
 
 // ==================== WALLET ====================
