@@ -7,9 +7,8 @@ import {
   UnlockOutlined, 
   WalletOutlined, 
   CopyOutlined, 
-  HistoryOutlined, 
-  GlobalOutlined,
-  PlusCircleOutlined
+  HistoryOutlined,
+  GlobalOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useAllWallets, useUpdateWalletStatus } from '@/hooks/useWallets';

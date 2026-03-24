@@ -121,21 +121,51 @@ export interface Transaction {
 }
 
 // ==================== FEEDING ====================
-export type FeedingStatus = 'PENDING' | 'EXECUTING' | 'COMPLETED' | 'FAILED';
-export type TriggerSource = 'MANUAL_ADMIN' | 'AUTO_SCHEDULE';
+export type FeedingStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
 export interface FeedingPeriod {
   periodId: number;
-  scheduledAt?: string;
-  executedAt?: string;
+  semesterCode: string;
+  grantAmount: number;
   status: FeedingStatus;
-  triggerSource: TriggerSource;
-  totalStudents?: number;
-  totalCoinsDistributed?: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
-// ==================== DONATION ====================
+export interface FeedingPeriodDetail extends FeedingPeriod {
+  semesterName: string;
+  startDate: string;
+  endDate: string;
+  createdBy: {
+    userId: number;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+  };
+  totalUsersFed: number;
+  totalCoinsFed: number;
+  stats: {
+    totalUsersFed: number;
+    totalCoinsFed: number;
+    pendingUsers: number;
+    estimatedCoinsNeeded: number;
+    systemWalletBalance: number;
+    deficit: number;
+  };
+  users: Array<{
+    feedingId: number;
+    user: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl: string | null;
+    };
+    amountReceived: number;
+    fedAt: string;
+  }>;
+}
+
+  // ==================== DONATION ====================
 export interface Donation {
   donationId: number;
   amount: number;
@@ -216,10 +246,8 @@ export interface WalletTransactionParams {
 }
 
 export interface FeedingParams {
-  fromDate?: string;
-  toDate?: string;
+  semesterCode?: string;
   status?: FeedingStatus;
-  triggerSource?: TriggerSource;
   page?: number;
   size?: number;
 }
