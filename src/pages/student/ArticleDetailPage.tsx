@@ -2,15 +2,14 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useArticle } from '@/hooks/useArticles';
 import { useAddBookmark, useRemoveBookmark } from '@/hooks/useBookmarks';
-import { useComments, useCreateComment } from '@/hooks/useComments';
 import { useMyWallets } from '@/hooks/useWallets';
 import { useArticleDonations, useDonate } from '@/hooks/useDonations';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Button, Avatar, Tag, Divider, Typography, Space, Input, List } from 'antd';
+import { Button, Avatar, Divider, Typography } from 'antd';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import ArticleStatusBadge from '@/components/common/ArticleStatusBadge';
 import ArticleContentRenderer from '@/components/common/ArticleContentRenderer';
+import CommentSection from '@/components/common/CommentSection';
 import { useAuthStore } from '@/stores/authStore';
 
 const { Title, Text, Paragraph } = Typography;
@@ -23,8 +22,6 @@ export default function ArticleDetailPage() {
   const articleId = Number(id);
 
   const { data: article, isLoading } = useArticle(articleId);
-  const { data: comments } = useComments(articleId);
-  const { mutate: createComment, isPending: isCommenting } = useCreateComment();
   const { mutate: addBookmark, isPending: isAddingBookmark } = useAddBookmark();
   const { mutate: removeBookmark, isPending: isRemovingBookmark } = useRemoveBookmark();
   const isBookmarkPending = isAddingBookmark || isRemovingBookmark;
@@ -37,8 +34,6 @@ export default function ArticleDetailPage() {
     }
   };
 
-  const [commentContent, setCommentContent] = useState('');
-
   // API Hooks cho Donate
   const [donateAmount, setDonateAmount] = useState<number>(1);
   const { data: wallets } = useMyWallets();
@@ -48,13 +43,6 @@ export default function ArticleDetailPage() {
   const handleDonate = () => {
     if (!articleId) return;
     donate({ articleId, amount: donateAmount });
-  };
-
-  const handleCommentSubmit = () => {
-    if (!commentContent.trim() || !articleId) return;
-    createComment({ articleId, content: commentContent.trim() }, {
-      onSuccess: () => setCommentContent('')
-    });
   };
 
   const blueBalance = useMemo(() => {
@@ -182,7 +170,7 @@ export default function ArticleDetailPage() {
 
               <Button type="text" className="flex items-center gap-2 px-4 py-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors h-auto">
                 <span className="material-symbols-outlined text-slate-500">chat_bubble</span>
-                <span className="text-sm font-bold">{comments?.length || 0}</span>
+                <span className="text-sm font-bold">Bình luận</span>
               </Button>
             </div>
             <div className="flex items-center gap-2">
@@ -207,53 +195,7 @@ export default function ArticleDetailPage() {
           </div>
 
           {/* Comments Section */}
-          <div className="mt-12 pt-8">
-            <Title level={3} className="!text-xl !font-bold mb-6">Bình luận ({comments?.length || 0})</Title>
-
-            <div className="flex gap-4 mb-8">
-              <Avatar size={40} className="bg-teal-500 shrink-0">ME</Avatar>
-              <div className="flex-1 flex flex-col items-end gap-2">
-                <Input.TextArea
-                  rows={3}
-                  placeholder="Viết bình luận của bạn..."
-                  value={commentContent}
-                  onChange={e => setCommentContent(e.target.value)}
-                  className="rounded-xl resize-none"
-                />
-                <Button
-                  type="primary"
-                  className="bg-teal-600 hover:bg-teal-500 font-semibold rounded-lg px-6"
-                  onClick={handleCommentSubmit}
-                  loading={isCommenting}
-                  disabled={!commentContent.trim()}
-                >
-                  Gửi bình luận
-                </Button>
-              </div>
-            </div>
-
-            <List
-              dataSource={comments || []}
-              renderItem={(comment: any) => (
-                <List.Item className="border-b border-slate-100 dark:border-slate-800 py-6 last:border-0">
-                  <div className="flex gap-4 w-full">
-                    <Avatar src={comment.user?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.user?.fullName || 'User'}`} size={40} className="shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Text strong className="text-sm dark:text-white">{comment.user?.fullName || 'Người dùng ẩn danh'}</Text>
-                        <Text className="text-xs text-slate-400">
-                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: vi })}
-                        </Text>
-                      </div>
-                      <Paragraph className="text-sm text-slate-700 dark:text-slate-300 mb-0 leading-relaxed whitespace-pre-wrap">
-                        {comment.content}
-                      </Paragraph>
-                    </div>
-                  </div>
-                </List.Item>
-              )}
-            />
-          </div>
+          <CommentSection articleId={articleId} />
         </article>
         {/* Sidebar: Donate & Stats */}
         <aside className="w-full lg:w-[320px] shrink-0 space-y-6">

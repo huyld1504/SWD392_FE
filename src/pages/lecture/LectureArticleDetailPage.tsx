@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useArticle, useApproveArticle, useRejectArticle } from '@/hooks/useArticles';
-import { useComments, useCreateComment } from '@/hooks/useComments';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Button, Avatar, Typography, Space, Input, List, Modal } from 'antd';
+import { Button, Avatar, Typography, Space, Input, Modal } from 'antd';
 import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ArticleContentRenderer from '@/components/common/ArticleContentRenderer';
+import CommentSection from '@/components/common/CommentSection';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 
 const APPROVE_LABEL = 'Duyệt bài viết';
@@ -21,21 +21,11 @@ export default function LectureArticleDetailPage() {
   const articleId = Number(id);
 
   const { data: article, isLoading } = useArticle(articleId);
-  const { data: comments } = useComments(articleId);
-  const { mutate: createComment, isPending: isCommenting } = useCreateComment();
   const { mutate: approveArticle, isPending: isApproving } = useApproveArticle();
   const { mutate: rejectArticle, isPending: isRejecting } = useRejectArticle();
 
-  const [commentContent, setCommentContent] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
-
-  const handleCommentSubmit = () => {
-    if (!commentContent.trim() || !articleId) return;
-    createComment({ articleId, content: commentContent.trim() }, {
-      onSuccess: () => setCommentContent(''),
-    });
-  };
 
   const handleApprove = () => {
     approveArticle(articleId, {
@@ -166,55 +156,7 @@ export default function LectureArticleDetailPage() {
             </div>
 
             {/* Comments */}
-            <div className="mt-12 pt-8 border-t border-slate-100">
-              <Title level={3} className="!text-xl !font-bold mb-6">Bình luận ({comments?.length || 0})</Title>
-              <div className="flex gap-4 mb-8">
-                <Avatar size={40} className="bg-teal-500 shrink-0">ME</Avatar>
-                <div className="flex-1 flex flex-col items-end gap-2">
-                  <Input.TextArea
-                    rows={3}
-                    placeholder="Viết bình luận..."
-                    value={commentContent}
-                    onChange={(e) => setCommentContent(e.target.value)}
-                    className="rounded-xl resize-none"
-                  />
-                  <Button
-                    type="primary"
-                    className="bg-teal-600 hover:bg-teal-500 font-semibold rounded-lg px-6"
-                    onClick={handleCommentSubmit}
-                    loading={isCommenting}
-                    disabled={!commentContent.trim()}
-                  >
-                    Gửi bình luận
-                  </Button>
-                </div>
-              </div>
-              <List
-                dataSource={comments || []}
-                renderItem={(comment: any) => (
-                  <List.Item className="border-b border-slate-100 py-6 last:border-0">
-                    <div className="flex gap-4 w-full">
-                      <Avatar
-                        src={comment.user?.avatarUrl || `https://ui-avatars.com/api/?name=${comment.user?.fullName || 'User'}`}
-                        size={40}
-                        className="shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Text strong className="text-sm">{comment.user?.fullName || 'Người dùng ẩn danh'}</Text>
-                          <Text className="text-xs text-slate-400">
-                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: vi })}
-                          </Text>
-                        </div>
-                        <Paragraph className="text-sm text-slate-700 mb-0 leading-relaxed whitespace-pre-wrap">
-                          {comment.content}
-                        </Paragraph>
-                      </div>
-                    </div>
-                  </List.Item>
-                )}
-              />
-            </div>
+            <CommentSection articleId={articleId} />
           </article>
 
           {/* Sidebar — Article info */}
