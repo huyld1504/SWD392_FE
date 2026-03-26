@@ -39,6 +39,8 @@ import AdminSubjectsPage from '@/pages/admin/AdminSubjectsPage';
 import AdminTopicsPage from '@/pages/admin/AdminTopicsPage';
 import AdminFeedingsPage from '@/pages/admin/AdminFeedingsPage';
 import AdminWalletsPage from '@/pages/admin/AdminWalletsPage';
+import AdminSemestersPage from '@/pages/admin/AdminSemestersPage';
+import AdminLeaderboardPage from '@/pages/admin/AdminLeaderboardPage';
 
 // Guards
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -202,8 +204,16 @@ const router = createBrowserRouter([
             element: <AdminFeedingsPage />,
           },
           {
+            path: '/admin/semesters',
+            element: <AdminSemestersPage />,
+          },
+          {
             path: '/admin/wallets',
             element: <AdminWalletsPage />,
+          },
+          {
+            path: '/admin/leaderboard',
+            element: <AdminLeaderboardPage />,
           },
         ],
       },

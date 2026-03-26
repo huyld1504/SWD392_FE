@@ -138,30 +138,32 @@ function SingleCodeBlockEditor({
       </span>
     ),
     children: (
-      <Input.TextArea
-        value={tab.code}
-        onChange={(e) => updateCode(tab.lang, e.target.value)}
-        placeholder={`// ${langLabel(tab.lang)} code here...`}
-        autoSize={{ minRows: 8, maxRows: 24 }}
-        style={{
-          fontFamily: '"Fira Code", Consolas, monospace',
-          fontSize: 13,
-          lineHeight: 1.6,
-          background: '#0f172a',
-          color: '#e2e8f0',
-          borderRadius: 8,
-          border: 'none',
-          padding: '16px',
-          resize: 'vertical',
-        }}
-        spellCheck={false}
-      />
+      <div style={{ padding: 16, background: '#ffffff', border: '1px solid #d1fae5', borderTop: '1px solid #d1fae5', borderRadius: '0 0 12px 12px' }}>
+        <Input.TextArea
+          value={tab.code}
+          onChange={(e) => updateCode(tab.lang, e.target.value)}
+          placeholder={`// ${langLabel(tab.lang)} code here...`}
+          autoSize={{ minRows: 8, maxRows: 24 }}
+          style={{
+            fontFamily: '"Fira Code", Consolas, monospace',
+            fontSize: 13,
+            lineHeight: 1.6,
+            background: '#f8fafc',
+            color: '#0f172a',
+            borderRadius: 10,
+            border: '1px solid #e2e8f0',
+            padding: '14px',
+            resize: 'vertical',
+          }}
+          spellCheck={false}
+        />
+      </div>
     ),
   }));
 
   return (
     <Card
-      style={{ borderRadius: 12, border: '1px solid #e2e8f0', background: '#f8fafc', overflow: 'hidden' }}
+      style={{ borderRadius: 12, border: '1px solid #e2e8f0', background: '#ffffff', overflow: 'hidden', boxShadow: '0 6px 20px rgba(15, 118, 110, 0.06)' }}
       styles={{ body: { padding: 0 } }}
     >
       {/* Header */}
@@ -196,14 +198,22 @@ function SingleCodeBlockEditor({
         </Space>
       </div>
 
-      {/* Dark editor area */}
-      <div style={{ background: '#1e293b', padding: '0 16px 16px' }}>
+      {/* Editor area */}
+      <div style={{ background: '#f0fdf9', padding: 12 }}>
         <Tabs
+          type="card"
           activeKey={activeKey}
           onChange={setActiveKey}
           items={tabItems}
           size="small"
-          tabBarStyle={{ margin: '0 0 12px', borderBottom: '1px solid #334155', paddingTop: 8 }}
+          tabBarGutter={8}
+          tabBarStyle={{
+            margin: 0,
+            padding: '4px 6px 0',
+            background: '#e7f7f5',
+            border: '1px solid #d1fae5',
+            borderRadius: 10,
+          }}
         />
       </div>
     </Card>

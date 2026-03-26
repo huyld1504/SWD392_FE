@@ -95,7 +95,7 @@ export interface CommentParams {
 }
 
 // ==================== WALLET ====================
-export type WalletType = 'MAIN' | 'EARNED';
+export type WalletType = 'MAIN' | 'EARNED' | 'SYSTEM';
 export type WalletStatus = 'ACTIVE' | 'LOCKED';
 
 export interface Wallet {
@@ -267,6 +267,31 @@ export interface FeedingParams {
   status?: FeedingStatus;
   page?: number;
   size?: number;
+}
+
+// ==================== SEMESTER ====================
+export interface Semester {
+  semesterCode: string;
+  startDate: string;
+  endDate: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deleted?: boolean;
+}
+
+export interface SemesterParams extends PaginationParams {
+  status?: string;
+}
+
+export interface SemesterLeaderboardEntry {
+  userId: number;
+  fullName: string;
+  email: string;
+  avatarUrl?: string | null;
+  totalReceived: number;
+  rank: number;
+  donationCount?: number;
+  approvedArticleCount?: number;
 }
 
 export interface BookmarkParams {

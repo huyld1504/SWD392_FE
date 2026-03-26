@@ -83,8 +83,8 @@ export default function AdminWalletsPage() {
       width: 110,
       render: (type: WalletType) => (
         <Tag style={{
-          background: type === 'MAIN' ? 'rgba(13,148,136,0.1)' : '#f0fdf4',
-          color: type === 'MAIN' ? '#0d9488' : '#16a34a',
+          background: type === 'MAIN' ? 'rgba(13,148,136,0.1)' : type === 'SYSTEM' ? '#eef2ff' : '#f0fdf4',
+          color: type === 'MAIN' ? '#0d9488' : type === 'SYSTEM' ? '#4338ca' : '#16a34a',
           border: 'none', fontWeight: 700,
         }}>
           {type}
@@ -124,58 +124,89 @@ export default function AdminWalletsPage() {
       title: 'Hành động',
       key: 'actions',
       width: 160,
-      render: (_: unknown, record: Wallet) => (
-        <Space>
-           <Tooltip title="Xem lịch sử giao dịch">
-             <Button 
-                type="text" 
-                icon={<HistoryOutlined />} 
+      render: (_: unknown, record: Wallet) => {
+        const isSystemWallet = record.walletType === 'SYSTEM' || record.userId === 0;
+
+        if (isSystemWallet) {
+          return (
+            <Space>
+              <Tooltip title="Xem lịch sử giao dịch">
+                <Button
+                  type="text"
+                  icon={<HistoryOutlined />}
+                  onClick={() => {
+                    setSelectedWalletId(record.walletId);
+                    setUserTxModalVisible(true);
+                  }}
+                />
+              </Tooltip>
+              <Tooltip title="Quản lý ví hệ thống từ nút phía trên">
+                <Button
+                  type="text"
+                  icon={<GlobalOutlined />}
+                  onClick={() => setSystemModalVisible(true)}
+                  style={{ fontWeight: 600, color: '#4338ca' }}
+                >
+                  Hệ thống
+                </Button>
+              </Tooltip>
+            </Space>
+          );
+        }
+
+        return (
+          <Space>
+            <Tooltip title="Xem lịch sử giao dịch">
+              <Button
+                type="text"
+                icon={<HistoryOutlined />}
                 onClick={() => {
-                   setSelectedWalletId(record.walletId);
-                   setUserTxModalVisible(true);
+                  setSelectedWalletId(record.walletId);
+                  setUserTxModalVisible(true);
                 }}
-             />
-           </Tooltip>
-           
-           {record.status === 'ACTIVE' ? (
-            <Popconfirm
+              />
+            </Tooltip>
+
+            {record.status === 'ACTIVE' ? (
+              <Popconfirm
                 title="Khóa ví này?"
                 description="Người dùng sẽ không thể thực hiện giao dịch."
                 onConfirm={() => updateStatus({ walletId: record.walletId, status: 'LOCKED' })}
                 okText="Khóa"
                 cancelText="Hủy"
                 okButtonProps={{ danger: true }}
-            >
+              >
                 <Button
-                type="text"
-                icon={<LockOutlined />}
-                danger
-                size="small"
-                style={{ fontWeight: 600 }}
+                  type="text"
+                  icon={<LockOutlined />}
+                  danger
+                  size="small"
+                  style={{ fontWeight: 600 }}
                 >
-                Khóa
+                  Khóa
                 </Button>
-            </Popconfirm>
+              </Popconfirm>
             ) : (
-            <Popconfirm
+              <Popconfirm
                 title="Mở khóa ví này?"
                 onConfirm={() => updateStatus({ walletId: record.walletId, status: 'ACTIVE' })}
                 okText="Mở khóa"
                 cancelText="Hủy"
                 okButtonProps={{ style: { background: '#0d9488', borderColor: '#0d9488' } }}
-            >
+              >
                 <Button
-                type="text"
-                icon={<UnlockOutlined />}
-                size="small"
-                style={{ color: '#0d9488', fontWeight: 600 }}
+                  type="text"
+                  icon={<UnlockOutlined />}
+                  size="small"
+                  style={{ color: '#0d9488', fontWeight: 600 }}
                 >
-                Mở
+                  Mở
                 </Button>
-            </Popconfirm>
+              </Popconfirm>
             )}
-        </Space>
-      ),
+          </Space>
+        );
+      },
     },
   ];
 

@@ -19,6 +19,7 @@ import {
   useUpdateFeeding,
   useFeedingDetail
 } from '@/hooks/useFeeding';
+import { useSemesters } from '@/hooks/useSemesters';
 import type { FeedingPeriod, FeedingStatus } from '@/types';
 
 const { Title, Text } = Typography;
@@ -59,6 +60,8 @@ export default function AdminFeedingsPage() {
   const { mutate: triggerFeeding } = useTriggerFeeding();
   const { mutate: completeFeeding } = useCompleteFeeding();
   const { mutate: deleteFeeding } = useDeleteFeeding();
+
+  const { data: semesters, isLoading: semestersLoading } = useSemesters({ pageSize: 100 });
 
   const { data: detailData, isLoading: detailLoading } = useFeedingDetail(
     selectedDetailId!,
@@ -284,17 +287,17 @@ export default function AdminFeedingsPage() {
           <Space direction="vertical" style={{ width: '100%' }} size="large">
             <Row gutter={16}>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                   <Statistic title="Trạng thái" value={STATUS_CONFIG[detailData.status]?.label || detailData.status} valueStyle={{ color: STATUS_CONFIG[detailData.status]?.color, fontSize: 16, fontWeight: 'bold' }} />
                 </Card>
               </Col>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                   <Statistic title="Kỳ học" value={detailData.semesterName || detailData.semesterCode} valueStyle={{ fontSize: 16, fontWeight: 'bold' }} />
                 </Card>
               </Col>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                  <Statistic title="Mức cấp phát" value={detailData.grantAmount} suffix="BLUE" />
                 </Card>
               </Col>
@@ -302,7 +305,7 @@ export default function AdminFeedingsPage() {
 
             <Row gutter={16}>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                   <Statistic 
                     title="Deficit (Thiếu hụt)" 
                     value={detailData.stats?.deficit ?? 0} 
@@ -312,12 +315,12 @@ export default function AdminFeedingsPage() {
                 </Card>
               </Col>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                   <Statistic title="Số dư hệ thống" value={detailData.stats?.systemWalletBalance ?? 0} valueStyle={{ color: '#10b981' }} suffix="BLUE" />
                 </Card>
               </Col>
               <Col span={8}>
-                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}>
+                <Card size="small" style={{ borderColor: '#e2e8f0', backgroundColor: '#f8fafc', height: 120, display: 'flex', alignItems: 'center' }}>
                   <Statistic title="Người dùng chưa nhận (Pending)" value={detailData.stats?.pendingUsers ?? 0} valueStyle={{ color: '#f59e0b' }} />
                 </Card>
               </Col>
@@ -365,11 +368,21 @@ export default function AdminFeedingsPage() {
              label="Mã kỳ học" 
              name="semesterCode" 
              rules={[
-               { required: true, message: 'Vui lòng nhập mã kỳ học!' },
+               { required: true, message: 'Vui lòng chọn mã kỳ học!' },
                { pattern: /^(SP|SU|FA)\d{2}$/, message: 'Định dạng mã kỳ học không hợp lệ (VD: SP26, SU26, FA26)' }
              ]}
           >
-             <Input placeholder="VD: SP26" />
+             <Select
+               showSearch
+               placeholder="Chọn kỳ học"
+               loading={semestersLoading}
+               optionFilterProp="label"
+               options={(semesters?.data ?? []).map((s) => ({
+                 value: s.semesterCode,
+                 label: `${s.semesterCode} (${format(new Date(s.startDate), 'dd/MM/yyyy')} - ${format(new Date(s.endDate), 'dd/MM/yyyy')})`,
+               }))}
+               filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+             />
           </Form.Item>
           <Form.Item 
              label="Số lượng Coin cấp phát (BLUE)" 

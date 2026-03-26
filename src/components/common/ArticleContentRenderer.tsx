@@ -52,12 +52,13 @@ function CopyButton({ code }: { code: string }) {
         icon={copied ? <CheckOutlined style={{ color: '#4ade80' }} /> : <CopyOutlined />}
         onClick={handleCopy}
         style={{
-          background: 'transparent',
-          border: '1px solid #334155',
-          color: copied ? '#4ade80' : '#94a3b8',
-          borderRadius: 6,
+          background: '#f8fafc',
+          border: '1px solid #c7eadf',
+          color: copied ? '#0f172a' : '#0f172a',
+          borderRadius: 8,
           fontSize: 12,
-          height: 28,
+          height: 30,
+          boxShadow: '0 4px 10px rgba(13, 148, 136, 0.08)',
         }}
       >
         {copied ? 'Copied' : 'Copy'}
@@ -74,63 +75,50 @@ function CodeBlockDisplay({ block }: { block: CodeBlock }) {
   return (
     <div
       style={{
-        borderRadius: 12,
+        borderRadius: 14,
         overflow: 'hidden',
-        border: '1px solid #1e293b',
+        border: '1px solid #d1fae5',
         margin: '20px 0',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+        boxShadow: '0 12px 36px rgba(13,148,136,0.12)',
+        background: '#ffffff',
       }}
     >
-      {/* Title bar */}
+      {/* Tabs & copy */}
       <div
         style={{
-          background: '#0f172a',
-          padding: '10px 16px',
+          background: '#e7f7f5',
+          padding: '8px 12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid #1e293b',
+          gap: 12,
+          borderBottom: '1px solid #d1fae5',
+          flexWrap: 'wrap',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Traffic light dots */}
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
-          <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-          {block.title && (
-            <Text style={{ color: '#94a3b8', fontSize: 12, fontFamily: 'monospace', marginLeft: 8 }}>
-              {block.title}
-            </Text>
-          )}
-        </div>
-        <CopyButton code={activeTab?.code ?? ''} />
-      </div>
-
-      {/* Language tabs */}
-      <div style={{ background: '#1e293b' }}>
-        <div style={{ display: 'flex', borderBottom: '1px solid #334155', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {block.tabs.map((tab) => {
             const isActive = tab.lang === activeKey;
-            const color = LANG_COLORS[tab.lang] ?? '#94a3b8';
+            const color = LANG_COLORS[tab.lang] ?? '#0f172a';
             return (
               <button
                 key={tab.lang}
                 onClick={() => setActiveKey(tab.lang)}
                 style={{
-                  padding: '8px 16px',
-                  background: isActive ? '#0f172a' : 'transparent',
-                  border: 'none',
-                  borderBottom: isActive ? `2px solid ${color}` : '2px solid transparent',
-                  color: isActive ? '#f1f5f9' : '#64748b',
+                  padding: '6px 12px',
+                  background: isActive ? '#ffffff' : '#d9f3ec',
+                  border: isActive ? `1px solid ${color}` : '1px solid #c7eadf',
+                  color: '#0f172a',
                   cursor: 'pointer',
                   fontSize: 13,
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
                   whiteSpace: 'nowrap',
-                  transition: 'all 0.15s',
-                  outline: 'none',
+                  borderRadius: 8,
+                  boxShadow: isActive ? '0 6px 14px rgba(13,148,136,0.16)' : 'none',
+                  transition: 'all 0.15s ease',
                 }}
               >
                 <span
@@ -148,27 +136,33 @@ function CodeBlockDisplay({ block }: { block: CodeBlock }) {
             );
           })}
         </div>
-
-        {/* Code area */}
-        <pre
-          style={{
-            margin: 0,
-            padding: '20px 24px',
-            background: '#0f172a',
-            color: '#e2e8f0',
-            fontFamily: '"Fira Code", "Cascadia Code", Consolas, "Courier New", monospace',
-            fontSize: 13.5,
-            lineHeight: 1.7,
-            overflowX: 'auto',
-            maxHeight: 520,
-            overflowY: 'auto',
-          }}
-        >
-          {/* Simple syntax highlighting could be added here, 
-              but for now we just show the text */}
-          <code>{activeTab?.code || '// (empty)'}</code>
-        </pre>
+        <CopyButton code={activeTab?.code ?? ''} />
       </div>
+
+      {block.title && (
+        <div style={{ padding: '10px 14px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+          <Text style={{ color: '#475569', fontSize: 12, fontWeight: 600 }}>{block.title}</Text>
+        </div>
+      )}
+
+      {/* Code area */}
+      <pre
+        style={{
+          margin: 0,
+          padding: '18px 20px',
+          background: '#ffffff',
+          color: '#0f172a',
+          fontFamily: '"Fira Code", "Cascadia Code", Consolas, "Courier New", monospace',
+          fontSize: 13.5,
+          lineHeight: 1.7,
+          overflowX: 'auto',
+          maxHeight: 520,
+          overflowY: 'auto',
+          whiteSpace: 'pre',
+        }}
+      >
+        <code>{activeTab?.code || '// (empty)'}</code>
+      </pre>
     </div>
   );
 }

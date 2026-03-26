@@ -187,10 +187,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats grid */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 32, alignItems: 'stretch' }}>
         {/* Total articles */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Tổng bài viết</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{totalArticles.toLocaleString()}</div>
             <Text style={{ fontSize: 10, color: '#94a3b8', marginTop: 8, display: 'block' }}>Cập nhật vừa xong</Text>
@@ -199,8 +202,8 @@ export default function AdminDashboard() {
         {/* Pending */}
         <Col xs={12} sm={8} lg={4}>
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}
-            styles={{ body: { padding: 20 } }}
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
           >
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#f59e0b' }} />
             <span style={{
@@ -214,7 +217,10 @@ export default function AdminDashboard() {
         </Col>
         {/* Approved */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Đã duyệt</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#10b981' }}>{(approvedPage?.totalItems ?? 0).toLocaleString()}</div>
             <div style={{ fontSize: 10, color: '#10b981', fontWeight: 700, marginTop: 4 }}>↑ 12%</div>
@@ -222,21 +228,30 @@ export default function AdminDashboard() {
         </Col>
         {/* Rejected */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Từ chối</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#f43f5e' }}>{rejectedPage?.totalItems ?? 0}</div>
           </Card>
         </Col>
         {/* Active wallets */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Tổng ví hoạt động</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{(activeWallets?.totalItems ?? 0).toLocaleString()}</div>
           </Card>
         </Col>
         {/* Locked wallets */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderLeft: '4px solid #f97316' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderLeft: '4px solid #f97316', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Ví bị khóa</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{lockedWallets?.totalItems ?? 0}</div>
             <div style={{ fontSize: 10, color: '#f97316', fontWeight: 700, marginTop: 4 }}>⚠ Cần kiểm tra</div>
@@ -339,52 +354,7 @@ export default function AdminDashboard() {
       </Row>
 
       {/* Bottom quick-info bar */}
-      <Row gutter={[16, 16]}>
-        {[
-          {
-            icon: <PayCircleOutlined style={{ color: '#0d968b', fontSize: 20 }} />,
-            bg: 'rgba(13,150,139,0.1)',
-            label: 'BLUE Coins cấp hôm nay',
-            value: recentFeedings
-              .filter((f) => f.status === 'COMPLETED' && f.grantAmount)
-              .reduce((sum, f) => sum + (f.grantAmount ?? 0), 0)
-              .toLocaleString() || '--',
-          },
-          {
-            icon: <UserAddOutlined style={{ color: '#d97706', fontSize: 20 }} />,
-            bg: '#fef3c7',
-            label: 'Thành viên mới',
-            value: '--',
-          },
-          {
-            icon: <MessageOutlined style={{ color: '#2563eb', fontSize: 20 }} />,
-            bg: '#dbeafe',
-            label: 'Bình luận mới',
-            value: '--',
-          },
-          {
-            icon: <WarningOutlined style={{ color: '#dc2626', fontSize: 20 }} />,
-            bg: '#fee2e2',
-            label: 'Báo cáo vi phạm',
-            value: '--',
-            valueColor: '#dc2626',
-          },
-        ].map((item) => (
-          <Col xs={12} md={6} key={item.label}>
-            <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 16 } }}>
-              <Space size={16}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <Text style={{ fontSize: 11, color: '#64748b', display: 'block' }}>{item.label}</Text>
-                  <Text strong style={{ fontSize: 18, color: item.valueColor }}>{item.value}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+    
 
       {/* Reject modal */}
       <Modal
