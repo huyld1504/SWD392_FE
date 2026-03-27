@@ -96,7 +96,7 @@ export default function Header() {
           </div>
         )}
 
-        {/* GOLD balance — LECTURE only */}
+        {/* GOLD balance — LECTURE only
         {user?.role === 'LECTURE' && (
           <div
             style={{
@@ -114,7 +114,7 @@ export default function Header() {
               {earnedWallet?.balance ?? 0} GOLD
             </Text>
           </div>
-        )}
+        )} */}
 
         {/* Notifications */}
 

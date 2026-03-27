@@ -17,6 +17,7 @@ import {
   ThunderboltOutlined,
   WalletOutlined,
   CheckCircleOutlined,
+  CalendarOutlined,
 
   TrophyOutlined,
 } from '@ant-design/icons';
@@ -57,13 +58,13 @@ const adminItems: MenuItem[] = [
   makeItem(<Link to="/admin/articles">Quản lý bài viết</Link>, '/admin/articles', <FileTextOutlined />),
   makeItem(<Link to="/admin/subjects">Quản lý Môn học</Link>, '/admin/subjects', <ReadOutlined />),
   makeItem(<Link to="/admin/topics">Quản lý Chủ đề</Link>, '/admin/topics', <TagsOutlined />),
+  makeItem(<Link to="/admin/semesters">Quản lý Kỳ học</Link>, '/admin/semesters', <CalendarOutlined />),
   makeItem(<Link to="/admin/feedings">Quản lý Feedings</Link>, '/admin/feedings', <ThunderboltOutlined />),
   makeItem(<Link to="/admin/wallets">Quản lý Ví</Link>, '/admin/wallets', <WalletOutlined />),
+  makeItem(<Link to="/admin/leaderboard">Bảng xếp hạng</Link>, '/admin/leaderboard', <TrophyOutlined />),
 ];
 
-const bottomItems: MenuItem[] = [
-  makeItem(<Link to="/settings">Cài đặt</Link>, '/settings', <SettingOutlined />),
-];
+
 
 export default function Sidebar() {
   const location = useLocation();
@@ -151,15 +152,7 @@ export default function Sidebar() {
         </div>
 
         {/* Settings at bottom */}
-        <div style={{ borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <Menu
-            mode="inline"
-            selectedKeys={[location.pathname]}
-            items={bottomItems}
-            inlineCollapsed={!isSidebarOpen}
-            style={{ borderRight: 'none' }}
-          />
-        </div>
+      
       </div>
     </Sider>
   );

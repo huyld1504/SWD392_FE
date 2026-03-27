@@ -1,31 +1,45 @@
 import axiosInstance from './axiosInstance';
-import type { ApiResponse, FeedingPeriod, FeedingParams, PaginationResponse } from '@/types';
+import type { ApiResponse, FeedingPeriod, FeedingParams, PaginationResponse, FeedingPeriodDetail } from '@/types';
 
 // ==================== REQUEST TYPES ====================
-export interface ScheduleFeedingRequest {
-  scheduledAt: string; // ISO datetime e.g. "2026-04-01T08:00:00"
+export interface CreateFeedingRequest {
+  semesterCode: string;
+  grantAmount: number;
+}
+
+export interface UpdateFeedingRequest {
+  grantAmount: number;
 }
 
 // ==================== API CALLS ====================
 export const feedingApi = {
   /**
-   * Create a PENDING feeding period scheduled for a future date.
+   * Create a new feeding period.
    * Role: ADMIN only.
    */
-  schedule: async (data: ScheduleFeedingRequest): Promise<FeedingPeriod> => {
+  create: async (data: CreateFeedingRequest): Promise<FeedingPeriod> => {
     const res = await axiosInstance.post<ApiResponse<FeedingPeriod>>(
-      '/api/v1/feedings/schedule',
+      '/api/v1/feedings',
       data,
     );
     return res.data.data;
   },
 
   /**
-   * Immediately execute a feeding reset for all active students (once per month).
+   * Manually trigger coin feeding for an ACTIVE period.
    * Role: ADMIN only.
    */
-  triggerNow: async (): Promise<FeedingPeriod> => {
-    const res = await axiosInstance.post<ApiResponse<FeedingPeriod>>('/api/v1/feedings/trigger');
+  triggerNow: async (periodId: number): Promise<FeedingPeriod> => {
+    const res = await axiosInstance.post<ApiResponse<FeedingPeriod>>(`/api/v1/feedings/${periodId}/trigger`);
+    return res.data.data;
+  },
+
+  /**
+   * Complete early an ACTIVE feeding period.
+   * Role: ADMIN only.
+   */
+  complete: async (periodId: number): Promise<FeedingPeriod> => {
+    const res = await axiosInstance.put<ApiResponse<FeedingPeriod>>(`/api/v1/feedings/${periodId}/complete`);
     return res.data.data;
   },
 
@@ -42,21 +56,21 @@ export const feedingApi = {
   },
 
   /**
-   * Get detailed info of a feeding period (including students sorted by earned balance).
+   * Get detailed info of a feeding period.
    * Role: ADMIN only.
    */
-  getById: async (periodId: number): Promise<FeedingPeriod> => {
-    const res = await axiosInstance.get<ApiResponse<FeedingPeriod>>(
+  getById: async (periodId: number): Promise<FeedingPeriodDetail> => {
+    const res = await axiosInstance.get<ApiResponse<FeedingPeriodDetail>>(
       `/api/v1/feedings/${periodId}`,
     );
     return res.data.data;
   },
 
   /**
-   * Update the scheduledAt date of a PENDING feeding period.
+   * Update an ACTIVE feeding period grant amount.
    * Role: ADMIN only.
    */
-  updateSchedule: async (periodId: number, data: ScheduleFeedingRequest): Promise<FeedingPeriod> => {
+  update: async (periodId: number, data: UpdateFeedingRequest): Promise<FeedingPeriod> => {
     const res = await axiosInstance.put<ApiResponse<FeedingPeriod>>(
       `/api/v1/feedings/${periodId}`,
       data,
@@ -65,7 +79,7 @@ export const feedingApi = {
   },
 
   /**
-   * Delete a PENDING feeding period. Only PENDING periods can be deleted.
+   * Delete/Cancel a feeding period.
    * Role: ADMIN only.
    */
   delete: async (periodId: number): Promise<void> => {

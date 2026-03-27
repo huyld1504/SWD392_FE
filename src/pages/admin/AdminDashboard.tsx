@@ -8,12 +8,12 @@ import {
   Modal, Input, Popconfirm,
 } from 'antd';
 import {
-  PlusOutlined, ThunderboltOutlined, CheckOutlined, CloseOutlined,
+  ThunderboltOutlined, CheckOutlined, CloseOutlined,
   ClockCircleOutlined, PayCircleOutlined,
   UserAddOutlined, MessageOutlined, WarningOutlined,
 } from '@ant-design/icons';
 import { useArticles, useApproveArticle, useRejectArticle } from '@/hooks/useArticles';
-import { useFeedings, useScheduleFeeding, useTriggerFeeding } from '@/hooks/useFeeding';
+import { useFeedings } from '@/hooks/useFeeding';
 import { walletApi } from '@/api/walletApi';
 import type { Article, FeedingPeriod, FeedingStatus } from '@/types';
 import type { ColumnsType } from 'antd/es/table';
@@ -23,9 +23,9 @@ const { Title, Text } = Typography;
 // --- Feeding status config ---------------------------------------------------
 const FEEDING_STATUS: Record<FeedingStatus, { label: string; bg: string; color: string }> = {
   COMPLETED: { label: 'COMPLETED', bg: '#d1fae5', color: '#065f46' },
-  EXECUTING: { label: 'EXECUTING', bg: '#dbeafe', color: '#1d4ed8' },
-  PENDING:   { label: 'PENDING',   bg: '#f1f5f9', color: '#475569' },
-  FAILED:    { label: 'FAILED',    bg: '#fee2e2', color: '#b91c1c' },
+  ACTIVE:    { label: 'ACTIVE',    bg: '#dbeafe', color: '#1d4ed8' },
+  CANCELLED: { label: 'CANCELLED', bg: '#fee2e2', color: '#b91c1c' },
+  PENDING:   { label: 'PENDING',   bg: '#fef3c7', color: '#b45309' },
 };
 
 function FeedingStatusBadge({ status }: { status: FeedingStatus }) {
@@ -69,15 +69,9 @@ export default function AdminDashboard() {
   // -- Mutations --------------------------------------------------------------
   const { mutate: approve } = useApproveArticle();
   const { mutate: reject, isPending: rejecting } = useRejectArticle();
-  const { mutate: scheduleFeed, isPending: scheduling } = useScheduleFeeding();
-  const { mutate: triggerNow, isPending: triggering } = useTriggerFeeding();
-
   // -- Local state ------------------------------------------------------------
   const [rejectTarget, setRejectTarget] = useState<Article | null>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [createFeedOpen, setCreateFeedOpen] = useState(false);
-  const [scheduledAt, setScheduledAt] = useState('');
-
   // -- Handlers ---------------------------------------------------------------
   const handleReject = () => {
     if (!rejectTarget || !rejectReason.trim()) return;
@@ -89,14 +83,6 @@ export default function AdminDashboard() {
           setRejectReason('');
         },
       },
-    );
-  };
-
-  const handleScheduleFeed = () => {
-    if (!scheduledAt) return;
-    scheduleFeed(
-      { scheduledAt: new Date(scheduledAt).toISOString() },
-      { onSuccess: () => { setCreateFeedOpen(false); setScheduledAt(''); } },
     );
   };
 
@@ -190,40 +176,25 @@ export default function AdminDashboard() {
           <Text style={{ color: '#64748b', fontSize: 14 }}>Chào mừng trở lại, đây là những gì đang diễn ra hôm nay.</Text>
         </div>
         <Space>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            size="large"
-            onClick={() => setCreateFeedOpen(true)}
-            style={{ background: '#0d968b', borderColor: '#0d968b', borderRadius: 8, fontWeight: 600 }}
-          >
-            Tạo Feeding mới
-          </Button>
-          <Popconfirm
-            title="Kích hoạt Feeding ngay?"
-            description="Hệ thống sẽ phân phối BLUE coins cho tất cả học sinh ngay lập tức."
-            onConfirm={() => triggerNow()}
-            okText="Trigger"
-            cancelText="Hủy"
-            okButtonProps={{ danger: true }}
-          >
             <Button
-              icon={<ThunderboltOutlined />}
+              type="primary"
               size="large"
-              loading={triggering}
-              style={{ background: '#f97316', borderColor: '#f97316', color: '#fff', borderRadius: 8, fontWeight: 600 }}
+              style={{ background: '#0d968b', borderColor: '#0d968b', borderRadius: 8, fontWeight: 600 }}
+              onClick={() => window.location.href='/admin/feedings'}
             >
-              Trigger ngay
+              Quản lý Feeding
             </Button>
-          </Popconfirm>
-        </Space>
+          </Space>
       </div>
 
       {/* Stats grid */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 32, alignItems: 'stretch' }}>
         {/* Total articles */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Tổng bài viết</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{totalArticles.toLocaleString()}</div>
             <Text style={{ fontSize: 10, color: '#94a3b8', marginTop: 8, display: 'block' }}>Cập nhật vừa xong</Text>
@@ -232,8 +203,8 @@ export default function AdminDashboard() {
         {/* Pending */}
         <Col xs={12} sm={8} lg={4}>
           <Card
-            style={{ borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative' }}
-            styles={{ body: { padding: 20 } }}
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden', position: 'relative', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
           >
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: '#f59e0b' }} />
             <span style={{
@@ -247,7 +218,10 @@ export default function AdminDashboard() {
         </Col>
         {/* Approved */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Đã duyệt</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#10b981' }}>{(approvedPage?.totalItems ?? 0).toLocaleString()}</div>
             <div style={{ fontSize: 10, color: '#10b981', fontWeight: 700, marginTop: 4 }}>↑ 12%</div>
@@ -255,21 +229,30 @@ export default function AdminDashboard() {
         </Col>
         {/* Rejected */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Từ chối</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#f43f5e' }}>{rejectedPage?.totalItems ?? 0}</div>
           </Card>
         </Col>
         {/* Active wallets */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Tổng ví hoạt động</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{(activeWallets?.totalItems ?? 0).toLocaleString()}</div>
           </Card>
         </Col>
         {/* Locked wallets */}
         <Col xs={12} sm={8} lg={4}>
-          <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderLeft: '4px solid #f97316' }} styles={{ body: { padding: 20 } }}>
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0', borderLeft: '4px solid #f97316', height: '100%' }}
+            styles={{ body: { padding: 20, display: 'flex', flexDirection: 'column', gap: 8, height: '100%' } }}
+          >
             <Text style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Ví bị khóa</Text>
             <div style={{ fontSize: 26, fontWeight: 800, color: '#0f172a' }}>{lockedWallets?.totalItems ?? 0}</div>
             <div style={{ fontSize: 10, color: '#f97316', fontWeight: 700, marginTop: 4 }}>⚠ Cần kiểm tra</div>
@@ -330,30 +313,30 @@ export default function AdminDashboard() {
                       key={f.periodId}
                       style={{
                         padding: 16, borderRadius: 12, border: '1px solid #f1f5f9',
-                        background: '#fafafa', opacity: f.status === 'PENDING' ? 0.75 : 1,
+                        background: '#fafafa', opacity: f.status === 'ACTIVE' ? 0.75 : 1,
                       }}
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <FeedingStatusBadge status={f.status} />
                         <Text style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500 }}>
-                          {f.status === 'EXECUTING'
+                          {f.status === 'ACTIVE'
                             ? 'Đang chạy...'
-                            : f.executedAt
-                              ? format(new Date(f.executedAt), 'HH:mm - dd/MM/yyyy', { locale: vi })
-                              : f.scheduledAt
-                                ? format(new Date(f.scheduledAt), 'HH:mm - dd/MM/yyyy', { locale: vi })
+                            : f.createdAt
+                              ? format(new Date(f.createdAt), 'HH:mm - dd/MM/yyyy', { locale: vi })
+                              : f.createdAt
+                                ? format(new Date(f.createdAt), 'HH:mm - dd/MM/yyyy', { locale: vi })
                                 : '--'}
                         </Text>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <div>
-                          <Text style={{ fontSize: 11, color: '#94a3b8', display: 'block' }}>Trigger Source</Text>
-                          <Text style={{ fontWeight: 700, fontSize: 13 }}>{f.triggerSource}</Text>
+                          <Text style={{ fontSize: 11, color: '#94a3b8', display: 'block' }}>Kỳ học</Text>
+                          <Text style={{ fontWeight: 700, fontSize: 13 }}>{f.semesterCode}</Text>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <Text style={{ fontSize: 11, color: '#94a3b8', display: 'block' }}>Học sinh</Text>
                           <Text style={{ fontWeight: 700, fontSize: 13 }}>
-                            {f.totalStudents != null ? `${f.totalStudents.toLocaleString()} users` : '-- users'}
+                            {(f as any).totalStudents != null ? `${(f as any).totalStudents.toLocaleString()} users` : '-- users'}
                           </Text>
                         </div>
                       </div>
@@ -372,52 +355,7 @@ export default function AdminDashboard() {
       </Row>
 
       {/* Bottom quick-info bar */}
-      <Row gutter={[16, 16]}>
-        {[
-          {
-            icon: <PayCircleOutlined style={{ color: '#0d968b', fontSize: 20 }} />,
-            bg: 'rgba(13,150,139,0.1)',
-            label: 'BLUE Coins cấp hôm nay',
-            value: recentFeedings
-              .filter((f) => f.status === 'COMPLETED' && f.totalCoinsDistributed)
-              .reduce((sum, f) => sum + (f.totalCoinsDistributed ?? 0), 0)
-              .toLocaleString() || '--',
-          },
-          {
-            icon: <UserAddOutlined style={{ color: '#d97706', fontSize: 20 }} />,
-            bg: '#fef3c7',
-            label: 'Thành viên mới',
-            value: '--',
-          },
-          {
-            icon: <MessageOutlined style={{ color: '#2563eb', fontSize: 20 }} />,
-            bg: '#dbeafe',
-            label: 'Bình luận mới',
-            value: '--',
-          },
-          {
-            icon: <WarningOutlined style={{ color: '#dc2626', fontSize: 20 }} />,
-            bg: '#fee2e2',
-            label: 'Báo cáo vi phạm',
-            value: '--',
-            valueColor: '#dc2626',
-          },
-        ].map((item) => (
-          <Col xs={12} md={6} key={item.label}>
-            <Card style={{ borderRadius: 12, border: '1px solid #e2e8f0' }} styles={{ body: { padding: 16 } }}>
-              <Space size={16}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {item.icon}
-                </div>
-                <div>
-                  <Text style={{ fontSize: 11, color: '#64748b', display: 'block' }}>{item.label}</Text>
-                  <Text strong style={{ fontSize: 18, color: item.valueColor }}>{item.value}</Text>
-                </div>
-              </Space>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+    
 
       {/* Reject modal */}
       <Modal
@@ -442,40 +380,7 @@ export default function AdminDashboard() {
         />
       </Modal>
 
-      {/* Create feeding modal */}
-      <Modal
-        open={createFeedOpen}
-        title="Tạo lịch Feeding mới"
-        onCancel={() => { setCreateFeedOpen(false); setScheduledAt(''); }}
-        onOk={handleScheduleFeed}
-        okText="Tạo lịch"
-        cancelText="Hủy"
-        okButtonProps={{
-          loading: scheduling,
-          disabled: !scheduledAt,
-          style: { background: '#0d968b', borderColor: '#0d968b' },
-        }}
-      >
-        <div style={{ marginBottom: 8 }}>
-          <Text style={{ fontWeight: 600 }}>
-            Thời gian thực hiện <span style={{ color: '#ef4444' }}>*</span>
-          </Text>
-        </div>
-        <input
-          type="datetime-local"
-          value={scheduledAt}
-          onChange={(e) => setScheduledAt(e.target.value)}
-          min={new Date().toISOString().slice(0, 16)}
-          style={{
-            width: '100%', padding: '8px 12px',
-            border: '1px solid #d9d9d9', borderRadius: 8,
-            fontSize: 14, outline: 'none',
-          }}
-        />
-        <Text style={{ fontSize: 12, color: '#94a3b8', marginTop: 8, display: 'block' }}>
-          Hệ thống sẽ tự động phân phối BLUE coins cho toàn bộ học sinh vào thời điểm này.
-        </Text>
-      </Modal>
+      
     </div>
   );
 }

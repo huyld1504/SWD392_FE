@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { feedingApi, type ScheduleFeedingRequest } from '@/api/feedingApi';
+import { feedingApi, type CreateFeedingRequest, type UpdateFeedingRequest } from '@/api/feedingApi';
 import type { FeedingParams } from '@/types';
 import { toast } from 'sonner';
 
@@ -17,19 +17,46 @@ export const useFeedings = (params: FeedingParams = {}) =>
     placeholderData: (prev) => prev,
   });
 
-/** MUTATION: Schedule a new feeding period */
-export const useScheduleFeeding = () => {
+/** GET detailed info of a feeding period */
+export const useFeedingDetail = (id: number, enabled: boolean = true) =>
+  useQuery({
+    queryKey: feedingKeys.detail(id),
+    queryFn: () => feedingApi.getById(id),
+    enabled,
+  });
+
+/** MUTATION: Create a new feeding period */
+export const useCreateFeeding = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: ScheduleFeedingRequest) => feedingApi.schedule(data),
+    mutationFn: (data: CreateFeedingRequest) => feedingApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: feedingKeys.all });
-      toast.success('Đã tạo lịch Feeding mới!');
+      toast.success('Đã tạo kỳ Feeding mới!');
     },
     onError: (err: unknown) => {
       const message =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Không thể tạo lịch Feeding!';
+        'Không thể tạo kỳ Feeding!';
+      toast.error(message);
+    },
+  });
+};
+
+/** MUTATION: Update a feeding period */
+export const useUpdateFeeding = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ periodId, data }: { periodId: number; data: UpdateFeedingRequest }) => feedingApi.update(periodId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: feedingKeys.all });
+      queryClient.invalidateQueries({ queryKey: feedingKeys.detail(variables.periodId) });
+      toast.success('Đã cập nhật kỳ Feeding!');
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Không thể cập nhật kỳ Feeding!';
       toast.error(message);
     },
   });
@@ -39,10 +66,11 @@ export const useScheduleFeeding = () => {
 export const useTriggerFeeding = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: feedingApi.triggerNow,
-    onSuccess: () => {
+    mutationFn: (periodId: number) => feedingApi.triggerNow(periodId),
+    onSuccess: (_, periodId) => {
       queryClient.invalidateQueries({ queryKey: feedingKeys.all });
-      toast.success('Đã kích hoạt Feeding thành công!');
+      queryClient.invalidateQueries({ queryKey: feedingKeys.detail(periodId) });
+      toast.success('Đã kích hoạt phát Coin!');
     },
     onError: (err: unknown) => {
       const message =
@@ -53,15 +81,39 @@ export const useTriggerFeeding = () => {
   });
 };
 
-/** MUTATION: Delete a PENDING feeding period */
+/** MUTATION: Complete feeding period early */
+export const useCompleteFeeding = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (periodId: number) => feedingApi.complete(periodId),
+    onSuccess: (_, periodId) => {
+      queryClient.invalidateQueries({ queryKey: feedingKeys.all });
+      queryClient.invalidateQueries({ queryKey: feedingKeys.detail(periodId) });
+      toast.success('Đã kết thúc kỳ Feeding!');
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Không thể kết thúc kỳ Feeding!';
+      toast.error(message);
+    },
+  });
+};
+
+/** MUTATION: Delete a feeding period */
 export const useDeleteFeeding = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: feedingApi.delete,
+    mutationFn: (periodId: number) => feedingApi.delete(periodId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: feedingKeys.all });
-      toast.success('Đã xóa lịch Feeding!');
+      toast.success('Đã xóa kỳ Feeding!');
     },
-    onError: () => toast.error('Không thể xóa Feeding!'),
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        'Không thể xóa kỳ Feeding!';
+      toast.error(message);
+    },
   });
 };

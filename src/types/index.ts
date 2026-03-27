@@ -95,7 +95,7 @@ export interface CommentParams {
 }
 
 // ==================== WALLET ====================
-export type WalletType = 'MAIN' | 'EARNED';
+export type WalletType = 'MAIN' | 'EARNED' | 'SYSTEM';
 export type WalletStatus = 'ACTIVE' | 'LOCKED';
 
 export interface Wallet {
@@ -138,21 +138,51 @@ export interface Transaction {
 }
 
 // ==================== FEEDING ====================
-export type FeedingStatus = 'PENDING' | 'EXECUTING' | 'COMPLETED' | 'FAILED';
-export type TriggerSource = 'MANUAL_ADMIN' | 'AUTO_SCHEDULE';
+export type FeedingStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED'| 'PENDING';
 
 export interface FeedingPeriod {
   periodId: number;
-  scheduledAt?: string;
-  executedAt?: string;
+  semesterCode: string;
+  grantAmount: number;
   status: FeedingStatus;
-  triggerSource: TriggerSource;
-  totalStudents?: number;
-  totalCoinsDistributed?: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
-// ==================== DONATION ====================
+export interface FeedingPeriodDetail extends FeedingPeriod {
+  semesterName: string;
+  startDate: string;
+  endDate: string;
+  createdBy: {
+    userId: number;
+    name: string;
+    email: string;
+    avatarUrl: string | null;
+  };
+  totalUsersFed: number;
+  totalCoinsFed: number;
+  stats: {
+    totalUsersFed: number;
+    totalCoinsFed: number;
+    pendingUsers: number;
+    estimatedCoinsNeeded: number;
+    systemWalletBalance: number;
+    deficit: number;
+  };
+  users: Array<{
+    feedingId: number;
+    user: {
+      userId: number;
+      name: string;
+      email: string;
+      avatarUrl: string | null;
+    };
+    amountReceived: number;
+    fedAt: string;
+  }>;
+}
+
+  // ==================== DONATION ====================
 export interface Donation {
   donationId: number;
   amount: number;
@@ -233,12 +263,35 @@ export interface WalletTransactionParams {
 }
 
 export interface FeedingParams {
-  fromDate?: string;
-  toDate?: string;
+  semesterCode?: string;
   status?: FeedingStatus;
-  triggerSource?: TriggerSource;
   page?: number;
   size?: number;
+}
+
+// ==================== SEMESTER ====================
+export interface Semester {
+  semesterCode: string;
+  startDate: string;
+  endDate: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deleted?: boolean;
+}
+
+export interface SemesterParams extends PaginationParams {
+  status?: string;
+}
+
+export interface SemesterLeaderboardEntry {
+  userId: number;
+  fullName: string;
+  email: string;
+  avatarUrl?: string | null;
+  totalReceived: number;
+  rank: number;
+  donationCount?: number;
+  approvedArticleCount?: number;
 }
 
 export interface BookmarkParams {

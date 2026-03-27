@@ -72,7 +72,7 @@ export default function ArticleDetailPage() {
 
   return (
     <div className="flex-1 overflow-y-auto w-full font-sans">
-      <div className="max-w-[1200px] mx-auto px-6 py-8 flex items-start gap-10 flex-col lg:flex-row">
+      <div className="max-w-[1400px] mx-auto px-6 py-8 flex items-start gap-10 flex-col lg:flex-row">
         {/* Article Content Column */}
 
         <article className="flex-1 w-full min-w-0 lg:w-[calc(100%-360px)]">

@@ -9,6 +9,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 // Student pages
 import StudentDashboard from '@/pages/student/StudentDashboard';
@@ -39,6 +40,8 @@ import AdminSubjectsPage from '@/pages/admin/AdminSubjectsPage';
 import AdminTopicsPage from '@/pages/admin/AdminTopicsPage';
 import AdminFeedingsPage from '@/pages/admin/AdminFeedingsPage';
 import AdminWalletsPage from '@/pages/admin/AdminWalletsPage';
+import AdminSemestersPage from '@/pages/admin/AdminSemestersPage';
+import AdminLeaderboardPage from '@/pages/admin/AdminLeaderboardPage';
 
 // Guards
 import ProtectedRoute from '@/components/common/ProtectedRoute';
@@ -64,6 +67,10 @@ const router = createBrowserRouter([
   {
     path: '/unauthorized',
     element: <UnauthorizedPage />,
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 
   // ─── Student routes ──────────────────────────
@@ -202,8 +209,16 @@ const router = createBrowserRouter([
             element: <AdminFeedingsPage />,
           },
           {
+            path: '/admin/semesters',
+            element: <AdminSemestersPage />,
+          },
+          {
             path: '/admin/wallets',
             element: <AdminWalletsPage />,
+          },
+          {
+            path: '/admin/leaderboard',
+            element: <AdminLeaderboardPage />,
           },
         ],
       },

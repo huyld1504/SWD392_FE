@@ -66,7 +66,7 @@ export default function LectureWalletPage() {
           </div>
         </div>
 
-        {/* EARNED Wallet */}
+        {/* EARNED Wallet
         {earnedWallet ? (
           <div
             className={`relative overflow-hidden rounded-2xl p-8 shadow-xl cursor-pointer transition-all ${activeWallet === 'EARNED' ? 'ring-2 ring-amber-500 ring-offset-2' : ''
@@ -84,9 +84,9 @@ export default function LectureWalletPage() {
                   {earnedWallet.status === 'LOCKED' ? 'Bị khóa' : 'Hoạt động'}
                 </span>
               </div>
-              <p className="text-4xl font-black tracking-tighter">
-                {earnedWallet.balance} <span className="text-2xl">🪙 GOLD</span>
-              </p>
+              // <p className="text-4xl font-black tracking-tighter">
+              //   {earnedWallet.balance} <span className="text-2xl">🪙 GOLD</span>
+              // </p>
               <p className="text-sm text-amber-700/60 mt-4 font-mono">
                 ID: WS-{earnedWallet.walletId.toString().padStart(8, '0')}
               </p>
@@ -106,7 +106,7 @@ export default function LectureWalletPage() {
               {isCreating ? 'Đang tạo...' : '+ Tạo ví EARNED'}
             </button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Transaction History */}

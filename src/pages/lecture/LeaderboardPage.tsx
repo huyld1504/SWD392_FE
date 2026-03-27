@@ -1,47 +1,41 @@
-import { useMemo } from 'react';
-import { useArticles } from '@/hooks/useArticles';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
-import { Card, Typography, Table, Avatar, Tag, Spin } from 'antd';
-import { CrownOutlined, UserOutlined, FileTextOutlined, TrophyOutlined } from '@ant-design/icons';
+import { useSemesterLeaderboard, useSemesters } from '@/hooks/useSemesters';
+import type { Semester, SemesterLeaderboardEntry } from '@/types';
+import { Avatar, Card, Empty, Select, Spin, Table, Tag, Typography } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { CalendarOutlined, CrownOutlined, RiseOutlined, TrophyOutlined, UserOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
-interface AuthorStat {
-  rank: number;
-  userId: number;
-  name: string;
-  email: string;
-  avatarUrl?: string;
-  articleCount: number;
-}
+const formatCoins = (amount: number) => new Intl.NumberFormat('en-US').format(amount);
 
 export default function LeaderboardPage() {
   const user = useAuthStore((s) => s.user);
-  const { data, isLoading } = useArticles({ page: 1, pageSize: 50 });
+  const { data: semesterData, isLoading: isLoadingSemesters } = useSemesters({ page: 1, pageSize: 50 });
+  const semesters = useMemo(
+    () => (semesterData?.data ?? []).filter((s) => !s.deleted),
+    [semesterData],
+  );
 
-  const leaderboard = useMemo<AuthorStat[]>(() => {
-    if (!data?.data) return [];
-    const map = new Map<number, Omit<AuthorStat, 'rank'>>();
-    data.data.forEach((a) => {
-      if (!a.author) return;
-      const existing = map.get(a.author.userId);
-      if (existing) {
-        existing.articleCount += 1;
-      } else {
-        map.set(a.author.userId, {
-          userId: a.author.userId,
-          name: a.author.name,
-          email: a.author.email,
-          avatarUrl: a.author.avatarUrl,
-          articleCount: 1,
-        });
-      }
-    });
-    return Array.from(map.values())
-      .sort((a, b) => b.articleCount - a.articleCount)
-      .map((item, idx) => ({ ...item, rank: idx + 1 }));
-  }, [data]);
+  const [selectedSemester, setSelectedSemester] = useState<string>();
+
+  useEffect(() => {
+    if (!selectedSemester && semesters.length > 0) {
+      setSelectedSemester(semesters[0].semesterCode);
+    }
+  }, [selectedSemester, semesters]);
+
+  const {
+    data: leaderboard = [],
+    isLoading: isLoadingLeaderboard,
+    isFetching: isFetchingLeaderboard,
+  } = useSemesterLeaderboard(selectedSemester);
+
+  const selectedSemesterInfo = useMemo<Semester | undefined>(
+    () => semesters.find((s) => s.semesterCode === selectedSemester),
+    [semesters, selectedSemester],
+  );
 
   const top3 = leaderboard.slice(0, 3);
 
@@ -51,27 +45,26 @@ export default function LeaderboardPage() {
     3: { bg: 'linear-gradient(135deg, #fed7aa, #fdba74)', border: '#f97316', text: '#9a3412', emoji: '🥉' },
   };
 
-  const columns: ColumnsType<AuthorStat> = [
+  const columns: ColumnsType<SemesterLeaderboardEntry> = [
     {
       title: 'HẠNG',
       dataIndex: 'rank',
-      width: 70,
-      render: (rank: number) => {
-        if (rank <= 3) {
-          return <span style={{ fontSize: 20 }}>{medalColors[rank].emoji}</span>;
-        }
-        return <Text strong style={{ color: '#94a3b8', fontSize: 14 }}>#{rank}</Text>;
-      },
+      width: 90,
+      render: (rank: number) => (
+        rank <= 3
+          ? <span style={{ fontSize: 20 }}>{medalColors[rank].emoji}</span>
+          : <Text strong style={{ color: '#94a3b8', fontSize: 14 }}>#{rank}</Text>
+      ),
     },
     {
-      title: 'TÁC GIẢ',
-      key: 'author',
-      render: (_: unknown, record: AuthorStat) => (
+      title: 'SINH VIÊN',
+      key: 'student',
+      render: (_: unknown, record) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Avatar src={record.avatarUrl} icon={<UserOutlined />} size={36} />
+          <Avatar src={record.avatarUrl ?? undefined} icon={<UserOutlined />} size={40} />
           <div>
             <Text strong style={{ fontSize: 14, color: '#1e293b' }}>
-              {record.name}
+              {record.fullName}
               {record.userId === user?.userId && (
                 <Tag color="teal" style={{ marginLeft: 8, fontSize: 10 }}>Bạn</Tag>
               )}
@@ -84,19 +77,23 @@ export default function LeaderboardPage() {
       ),
     },
     {
-      title: 'SỐ BÀI VIẾT',
-      dataIndex: 'articleCount',
-      width: 130,
-      render: (count: number) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <FileTextOutlined style={{ color: '#0d9488' }} />
-          <Text strong style={{ color: '#0f172a', fontSize: 16 }}>{count}</Text>
+      title: 'TỔNG COINS NHẬN',
+      dataIndex: 'totalReceived',
+      width: 180,
+      render: (amount: number) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <RiseOutlined style={{ color: '#0d9488' }} />
+          <Text strong style={{ color: '#0f172a', fontSize: 16 }}>{formatCoins(amount)} xu</Text>
         </div>
       ),
+      sorter: (a, b) => a.totalReceived - b.totalReceived,
+      defaultSortOrder: 'descend',
     },
   ];
 
-  if (isLoading) {
+  const isInitialLoading = (isLoadingSemesters || isLoadingLeaderboard) && leaderboard.length === 0;
+
+  if (isInitialLoading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
         <Spin size="large" tip="Đang tải bảng xếp hạng..." />
@@ -104,87 +101,130 @@ export default function LeaderboardPage() {
     );
   }
 
+  if (!semesters.length) {
+    return (
+      <Card>
+        <Empty description="Chưa có kỳ học nào" />
+      </Card>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>
-          <TrophyOutlined style={{ color: '#f59e0b', marginRight: 8 }} />
-          Bảng xếp hạng
-        </Title>
-        <Text style={{ color: '#64748b' }}>Top tác giả có nhiều bài viết được duyệt nhất.</Text>
-      </div>
-
-      {/* Top 3 Podium */}
-      {top3.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginBottom: 40, flexWrap: 'wrap' }}>
-          {[top3[1], top3[0], top3[2]].filter(Boolean).map((author) => {
-            const m = medalColors[author.rank];
-            const isFirst = author.rank === 1;
-            return (
-              <Card
-                key={author.userId}
-                style={{
-                  borderRadius: 16,
-                  border: `2px solid ${m.border}`,
-                  background: m.bg,
-                  width: isFirst ? 220 : 190,
-                  textAlign: 'center',
-                  transform: isFirst ? 'scale(1.05)' : undefined,
-                  boxShadow: isFirst ? '0 8px 30px rgba(245,158,11,0.2)' : undefined,
-                }}
-                styles={{ body: { padding: '24px 16px' } }}
-              >
-                <div style={{ fontSize: 32, marginBottom: 8 }}>{m.emoji}</div>
-                <Avatar
-                  src={author.avatarUrl}
-                  icon={<UserOutlined />}
-                  size={isFirst ? 72 : 56}
-                  style={{ border: `3px solid ${m.border}`, marginBottom: 12 }}
-                />
-                <div>
-                  <Text strong style={{ fontSize: isFirst ? 16 : 14, color: m.text, display: 'block' }}>
-                    {author.name}
-                  </Text>
-                  <Text style={{ fontSize: 11, color: '#64748b', display: 'block', marginTop: 2 }}>
-                    {author.email}
-                  </Text>
-                  <div style={{
-                    marginTop: 12, padding: '6px 14px', borderRadius: 999,
-                    background: 'rgba(255,255,255,0.7)', display: 'inline-flex',
-                    alignItems: 'center', gap: 6,
-                  }}>
-                    <FileTextOutlined style={{ color: '#0d9488' }} />
-                    <Text strong style={{ color: '#0f172a' }}>{author.articleCount} bài viết</Text>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Full ranking table */}
-      <Card
-        style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
-        styles={{ body: { padding: 0 } }}
-      >
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #f1f5f9' }}>
-          <Text strong style={{ fontSize: 16, color: '#1e293b' }}>
-            <CrownOutlined style={{ color: '#f59e0b', marginRight: 8 }} />
-            Bảng xếp hạng đầy đủ
+    <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 12 }}>
+        <div>
+          <Title level={2} style={{ margin: 0, fontWeight: 900, fontSize: 28 }}>
+            <TrophyOutlined style={{ color: '#f59e0b', marginRight: 8 }} />
+            Bảng xếp hạng quyên góp
+          </Title>
+          <Text style={{ color: '#64748b' }}>
+            Top sinh viên nhận được nhiều xu nhất trong kỳ học này.
           </Text>
         </div>
-        <Table
-          rowKey="userId"
-          columns={columns}
-          dataSource={leaderboard}
-          pagination={false}
-          rowClassName={(record) =>
-            record.userId === user?.userId ? 'bg-teal-50' : ''
-          }
+        <Select
+          style={{ minWidth: 220 }}
+          placeholder="Chọn kỳ học"
+          value={selectedSemester}
+          loading={isLoadingSemesters}
+          onChange={setSelectedSemester}
+          options={semesters.map((s) => ({ value: s.semesterCode, label: s.semesterCode }))}
         />
-      </Card>
+      </div>
+
+      {selectedSemesterInfo && (
+        <Card style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <CalendarOutlined style={{ fontSize: 28, color: '#0d9488' }} />
+            <div>
+              <Text strong style={{ display: 'block', fontSize: 14, color: '#0f172a' }}>
+                Kỳ {selectedSemesterInfo.semesterCode}
+              </Text>
+              <Text style={{ color: '#64748b' }}>
+                {selectedSemesterInfo.startDate} → {selectedSemesterInfo.endDate}
+              </Text>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {leaderboard.length === 0 ? (
+        <Card>
+          <Empty description="Chưa có dữ liệu quyên góp" />
+        </Card>
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
+            {[top3[1], top3[0], top3[2]].filter(Boolean).map((student) => {
+              const m = medalColors[student.rank];
+              const isFirst = student.rank === 1;
+              return (
+                <Card
+                  key={student.userId}
+                  style={{
+                    borderRadius: 16,
+                    border: `2px solid ${m.border}`,
+                    background: m.bg,
+                    width: isFirst ? 240 : 200,
+                    textAlign: 'center',
+                    transform: isFirst ? 'scale(1.05)' : undefined,
+                    boxShadow: isFirst ? '0 8px 30px rgba(245,158,11,0.2)' : undefined,
+                  }}
+                  styles={{ body: { padding: '22px 16px' } }}
+                >
+                  <div style={{ fontSize: 32, marginBottom: 8 }}>{m.emoji}</div>
+                  <Avatar
+                    src={student.avatarUrl ?? undefined}
+                    icon={<UserOutlined />}
+                    size={isFirst ? 78 : 62}
+                    style={{ border: `3px solid ${m.border}`, marginBottom: 12 }}
+                  />
+                  <div>
+                    <Text strong style={{ fontSize: isFirst ? 16 : 14, color: m.text, display: 'block' }}>
+                      {student.fullName}
+                    </Text>
+                    <Text style={{ fontSize: 11, color: '#64748b', display: 'block', marginTop: 2 }}>
+                      {student.email}
+                    </Text>
+                    <div style={{
+                      marginTop: 12,
+                      padding: '6px 14px',
+                      borderRadius: 999,
+                      background: 'rgba(255,255,255,0.7)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}>
+                      <RiseOutlined style={{ color: '#0d9488' }} />
+                      <Text strong style={{ color: '#0f172a' }}>{formatCoins(student.totalReceived)} xu</Text>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          <Card
+            style={{ borderRadius: 12, border: '1px solid #e2e8f0' }}
+            styles={{ body: { padding: 0 } }}
+          >
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <CrownOutlined style={{ color: '#f59e0b' }} />
+              <Text strong style={{ fontSize: 16, color: '#1e293b' }}>
+                Top {leaderboard.length} sinh viên trong kỳ
+              </Text>
+              {isFetchingLeaderboard && <Tag color="blue">Đang cập nhật...</Tag>}
+            </div>
+            <Table
+              rowKey="userId"
+              columns={columns}
+              dataSource={leaderboard}
+              pagination={false}
+              loading={isFetchingLeaderboard}
+              rowClassName={(record) => (record.userId === user?.userId ? 'bg-teal-50' : '')}
+            />
+          </Card>
+        </>
+      )}
     </div>
   );
 }
