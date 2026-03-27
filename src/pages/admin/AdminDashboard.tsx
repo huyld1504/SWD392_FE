@@ -25,6 +25,7 @@ const FEEDING_STATUS: Record<FeedingStatus, { label: string; bg: string; color: 
   COMPLETED: { label: 'COMPLETED', bg: '#d1fae5', color: '#065f46' },
   ACTIVE:    { label: 'ACTIVE',    bg: '#dbeafe', color: '#1d4ed8' },
   CANCELLED: { label: 'CANCELLED', bg: '#fee2e2', color: '#b91c1c' },
+  PENDING:   { label: 'PENDING',   bg: '#fef3c7', color: '#b45309' },
 };
 
 function FeedingStatusBadge({ status }: { status: FeedingStatus }) {
