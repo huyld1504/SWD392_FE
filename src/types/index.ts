@@ -138,7 +138,7 @@ export interface Transaction {
 }
 
 // ==================== FEEDING ====================
-export type FeedingStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type FeedingStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED'| 'PENDING';
 
 export interface FeedingPeriod {
   periodId: number;

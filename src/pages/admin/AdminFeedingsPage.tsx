@@ -28,6 +28,7 @@ const STATUS_CONFIG: Record<FeedingStatus, { label: string; color: string; icon:
   COMPLETED: { label: 'Hoàn thành', color: 'success', icon: <CheckCircleOutlined /> },
   ACTIVE:    { label: 'Đang hoạt động', color: 'processing', icon: <ClockCircleOutlined /> },
   CANCELLED: { label: 'Đã hủy',   color: 'error', icon: <CloseCircleOutlined /> },
+  PENDING:   { label: 'Đang chờ', color: 'warning', icon: <ClockCircleOutlined /> },
 };
 
 export default function AdminFeedingsPage() {
@@ -140,7 +141,7 @@ export default function AdminFeedingsPage() {
       key: 'actions',
       width: 250,
       render: (_: unknown, record: FeedingPeriod) =>
-        record.status === 'ACTIVE' ? (
+        record.status?  (
           <Space>
             <Button
                type="text"
@@ -233,7 +234,8 @@ export default function AdminFeedingsPage() {
             >
               <Select.Option value="ACTIVE">Đang hoạt động</Select.Option> 
               <Select.Option value="COMPLETED">Hoàn thành</Select.Option>     
-              <Select.Option value="CANCELLED">Đã hủy</Select.Option>        
+              <Select.Option value="CANCELLED">Đã hủy</Select.Option>       
+              <Select.Option value="PENDING">Đang chờ</Select.Option> 
             </Select>
           </Col>
           <Col>
@@ -389,7 +391,7 @@ export default function AdminFeedingsPage() {
              name="grantAmount"
              rules={[{ required: true, message: 'Vui lòng nhập số coin!' }]}
           >
-             <InputNumber min={1} style={{ width: '100%' }} placeholder="VD: 100" />
+             <Input min={1} style={{ width: '100%' }} placeholder="VD: 100" />
           </Form.Item>
         </Form>
       </Modal>

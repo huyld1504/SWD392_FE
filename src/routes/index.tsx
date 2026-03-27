@@ -9,6 +9,7 @@ import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import AuthCallback from '@/pages/auth/AuthCallback';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
+import NotFoundPage from '@/pages/NotFoundPage';
 
 // Student pages
 import StudentDashboard from '@/pages/student/StudentDashboard';
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
   {
     path: '/unauthorized',
     element: <UnauthorizedPage />,
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 
   // ─── Student routes ──────────────────────────

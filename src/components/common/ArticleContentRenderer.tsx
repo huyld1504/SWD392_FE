@@ -226,8 +226,10 @@ export default function ArticleContentRenderer({ html, className }: Props) {
     parts.push({ type: 'html', content: html.slice(lastIndex) });
   }
 
+  const rootClassName = className ? `article-body-text ${className}` : 'article-body-text';
+
   return (
-    <div className={className}>
+    <div className={rootClassName}>
       {parts.map((part, idx) =>
         part.type === 'html' ? (
           <div

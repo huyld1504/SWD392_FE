@@ -183,3 +183,47 @@
 html {
   font-size: var(--font-size);
 }
+
+/* Article content fallback typography (because Tailwind Preflight resets h1-h6) */
+.article-body-text {
+  color: #0f172a;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.article-body-text h1,
+.article-body-text h2,
+.article-body-text h3,
+.article-body-text h4,
+.article-body-text h5,
+.article-body-text h6 {
+  font-weight: 800;
+  line-height: 1.3;
+  margin-top: 1.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.article-body-text h1 { font-size: 2.25rem; }
+.article-body-text h2 { font-size: 1.875rem; }
+.article-body-text h3 { font-size: 1.5rem; }
+.article-body-text h4 { font-size: 1.25rem; }
+.article-body-text h5 { font-size: 1.125rem; }
+.article-body-text h6 { font-size: 1rem; }
+
+.article-body-text p,
+.article-body-text ul,
+.article-body-text ol,
+.article-body-text blockquote {
+  margin-bottom: 1rem;
+}
+
+.article-body-text ul,
+.article-body-text ol {
+  padding-left: 1.25rem;
+}
+
+.article-body-text blockquote {
+  border-left: 4px solid #14b8a6;
+  padding-left: 0.85rem;
+  color: #334155;
+}

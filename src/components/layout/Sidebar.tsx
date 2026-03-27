@@ -64,9 +64,7 @@ const adminItems: MenuItem[] = [
   makeItem(<Link to="/admin/leaderboard">Bảng xếp hạng</Link>, '/admin/leaderboard', <TrophyOutlined />),
 ];
 
-const bottomItems: MenuItem[] = [
-  makeItem(<Link to="/settings">Cài đặt</Link>, '/settings', <SettingOutlined />),
-];
+
 
 export default function Sidebar() {
   const location = useLocation();
@@ -154,15 +152,7 @@ export default function Sidebar() {
         </div>
 
         {/* Settings at bottom */}
-        <div style={{ borderTop: '1px solid #e2e8f0', flexShrink: 0 }}>
-          <Menu
-            mode="inline"
-            selectedKeys={[location.pathname]}
-            items={bottomItems}
-            inlineCollapsed={!isSidebarOpen}
-            style={{ borderRight: 'none' }}
-          />
-        </div>
+      
       </div>
     </Sider>
   );
